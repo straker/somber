@@ -47,6 +47,11 @@ describe('bind directive', () => {
       assert.equal(target.getAttribute('aria-foo'), 'false');
     });
 
+    it('to "0" when aria-attribute is 0', () => {
+      const { target } = setupFixture(`<div id="target" :aria-foo="0">hello</div>`);
+      assert.equal(target.getAttribute('aria-foo'), '0');
+    });
+
     it('when the binding changes', () => {
       const { target, host } = setupFixture(`<div id="target" :value="state.value">hello</div>`, {
         state: {
@@ -103,6 +108,7 @@ describe('bind directive', () => {
       assert.equal(target.getAttribute('value'), '100');
       host.state.value = false;
       assert.isFalse(target.hasAttribute('foo'));
+    });
   });
 
   describe('when the binding changes', () => {

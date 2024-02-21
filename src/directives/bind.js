@@ -1,6 +1,8 @@
 import evaluate from '../evaluate.js';
 import { accessedVars, clearAccessedVars } from '../watcher.js';
 
+// 0 is not considered falsey
+const falseyValues = [false, undefined, null, ''];
 
 export default function bindDirective(scope, node, name, exp, falsey) {
 
@@ -30,14 +32,15 @@ function setAttribute(node, name, value, falsey) {
     }
   }
 
-  // falsey boolean non-aria attributes will automatically be
-  // removed
+  // falsey (except 0) boolean non-aria attributes will
+  // automatically be removed
   if (!ariaAttr) {
-    if ([false, undefined, null, ''].includes(value)) {
+    if (falseyValues.includes(value)) {
       return node.removeAttribute(name);
     }
 
     // boolean attributes should be set with empty value
+    // @see https://developer.mozilla.org/en-US/docs/Web/API/Element/setAttribute#value
     if (value === true) {
       value = '';
     }
@@ -45,11 +48,12 @@ function setAttribute(node, name, value, falsey) {
     return node.setAttribute(name, value);
   }
 
-  if (value) {
-    return node.setAttribute(name, value);
+  // falsey (except 0) boolean aria attributes use the literal
+  // string "false"
+  if (falseyValues.includes(value)) {
+    return node.setAttribute(name, 'false');
   }
 
-  // falsey boolean aria attributes use the literal string
-  // "false"
-  node.setAttribute(name, 'false');
+
+  node.setAttribute(name, value);
 }
