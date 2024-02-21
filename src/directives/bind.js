@@ -21,15 +21,29 @@ function setAttribute(node, name, value, falsey) {
   value = falsey ? !value : value;
   const ariaAttr = name.startsWith('aria-');
 
-  // class will be set with an object
+  // class attribute will be set with an object
   if (name == 'class') {
-    for (const [className, condition] of Object.entries(value)) {
-      if (condition) {
-        return node.classList.add(className);
+    return Object.entries(value).map(([propName, condition]) => {
+      if (!condition) {
+        return node.classList.remove(propName);
       }
 
-      return node.classList.remove(className);
-    }
+      node.classList.add(propName);
+    });
+  }
+
+  // style attribute will be set with an object
+  if (name == 'style') {
+    return Object.entries(value).map(([propName, condition]) => {
+      // remove style by setting to empty string
+      // allow 0 value
+      // @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/style
+      if (falseyValues.includes(condition)) {
+        return node.style[propName] = '';
+      }
+
+      node.style[propName] = condition
+    });
   }
 
   // falsey (except 0) boolean non-aria attributes will
