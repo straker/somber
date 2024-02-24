@@ -99,6 +99,21 @@ describe('bind directive', () => {
       assert.isFalse(target.hasAttribute('foo'));
     });
 
+    it('when aria-attribute is null', () => {
+      const { target } = setupFixture(`<div id="target" :aria-foo="null">hello</div>`);
+      assert.isFalse(target.hasAttribute('aria-foo'));
+    });
+
+    it('when aria-attribute is undefined', () => {
+      const { target } = setupFixture(`<div id="target" :aria-foo="undefined">hello</div>`);
+      assert.isFalse(target.hasAttribute('aria-foo'));
+    });
+
+    it('when aria-attribute is ""', () => {
+      const { target } = setupFixture(`<div id="target" :aria-foo="">hello</div>`);
+      assert.isFalse(target.hasAttribute('aria-foo'));
+    });
+
     it('when the binding changes', () => {
       const { target, host } = setupFixture(`<div id="target" :value="state.value">hello</div>`, {
         state: {

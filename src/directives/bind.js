@@ -4,17 +4,17 @@ import { accessedVars, clearAccessedVars } from '../watcher.js';
 // 0 is not considered falsey
 const falseyValues = [false, undefined, null, ''];
 
-export default function bindDirective(scope, node, name, exp, falsey) {
+export default function bindDirective(reactiveNode, scope, directiveNode, name, exp, falsey) {
 
   clearAccessedVars();
   const value = evaluate(scope, exp);
   accessedVars.map(variable => {
-    scope.addEventListener(variable, event => {
-      setAttribute(node, name, evaluate(scope, exp), falsey);
+    reactiveNode.addEventListener(variable, () => {
+      setAttribute(directiveNode, name, evaluate(scope, exp), falsey);
     });
   });
 
-  setAttribute(node, name, value, falsey);
+  setAttribute(directiveNode, name, value, falsey);
 }
 
 function setAttribute(node, name, value, falsey) {
@@ -62,10 +62,12 @@ function setAttribute(node, name, value, falsey) {
     return node.setAttribute(name, value);
   }
 
-  // falsey (except 0) boolean aria attributes use the literal
-  // string "false"
-  if (falseyValues.includes(value)) {
+  if (value === false) {
     return node.setAttribute(name, 'false');
+  }
+  // falsey (except 0) boolean aria attributes get removed
+  else if (falseyValues.includes(value)) {
+    return node.removeAttribute(name);
   }
 
 

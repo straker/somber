@@ -1,7 +1,5 @@
 import { watchObject } from './watcher.js';
-
-import bindDirective from './directives/bind.js';
-import ifDirective from './directives/if.js';
+import walk from './walk.js';
 
 const template = document.createElement('template');
 
@@ -43,32 +41,7 @@ export default class CustomElement extends HTMLElement {
 
   html(str) {
     template.innerHTML = str;
-    const walker = document.createNodeIterator(template.content.firstElementChild, NodeFilter.SHOW_ALL);
-    let node;
-
-    while (node = walker.nextNode()) {
-      switch (node.nodeType) {
-      case 1: // Node.ELEMENT_NODE
-        for (let { name, value } of [...node.attributes]) {
-
-          // only perform logic on bound values
-          if (!name.startsWith(':')) {
-            continue;
-          }
-
-          node.removeAttribute(name);
-          name = name.substr(1);
-
-          switch(name) {
-          case 'if':
-            ifDirective(this, node, name, value);
-            break;
-          default:
-            bindDirective(this, node, name, value);
-          }
-        }
-      }
-    }
+    walk(this, this, template.content.firstElementChild);
 
     return template.content.firstElementChild;
   }

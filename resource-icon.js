@@ -13,8 +13,30 @@ class ResourceIcon extends CustomElement {
 
   constructor() {
     super();
-    this.state = { amount: 1000, max: 5000 };
+    this.state = {
+      cost: 200,
+      locked: true,
+      timer: 2000,
+      cooldown: 2000,
+      // list: ['one', 'two', 'three', 'four']
+    };
     this.truncateNumber = truncateNumber;
+
+    const int = setInterval(() => {
+      this.state.timer -= 10;
+      if (this.state.timer <= 0) {
+        this.state.timer = 0;
+        clearInterval(int);
+      }
+    }, 50)
+  }
+
+  displayCost(cost) {
+    return cost;
+  }
+
+  getSeconds(ms) {
+    return ms / 1000;
   }
 
   render() {
@@ -24,7 +46,19 @@ class ResourceIcon extends CustomElement {
     const max = 3;
     const data = this.props.data;
 
-    return this.html(`<div :foo="1">hello</div>`);
+    return this.html(`
+      <ul :for="(value, key, index) in state">
+        <li>{{index}} {{key}}: {{ value }} hello {{ state.cost }}</li>
+      </ul>
+    `);
+
+    // return this.html(`
+    //   <ul :for="(item, index) of list">
+    //     <li>{{ index }}. {{ item }}</li>
+    //   </ul>
+    // `);
+
+    // return this.html(`<div :foo="1">hello</div>`);
 
     // return this.html(`
     //   <span>
@@ -50,16 +84,23 @@ class ResourceIcon extends CustomElement {
     //   </span>
     // `);
 
-    // this.html(`
+    const type = 'action';
+    const index = 1;
+    const buttonName = 'Chop Wood';
+    const dashSeparate = () => {
+      return 'chop-wood'
+    }
+
+    // return this.html(`
     //   <div>
     //     <div data-col="1">
-    //       <span :if="state.locked" aria-hidden="true" hidden id="btn-desc-${type}-${index}">Locked. Requires {{ displayCost(state.cost) }}</span>
-    //       <button class="tipC" :class="{ locked: state.locked }" data-name="${dashSeparate(buttonName)}" :aria-describedby="state.locked ? 'btn-desc-${type}-${index}' : null }">
+    //       <span :if="state.locked" aria-hidden="true" hidden id="btn-desc-${type}-${index}">Locked. Requires {{ displayCost(state.cost) }} and {{state.timer}}</span>
+    //       <button class="tipC" :class="{ locked: state.locked }" data-name="${dashSeparate(buttonName)}" :aria-describedby="state.locked ? 'btn-desc-${type}-${index}' : null">
     //         <span :if="state.locked" class="icon Lock"></span>
-    //         <span :if="state.locked">{{ displayCost(state.cost) }}<span>
+    //         <span :if="state.locked">{{ displayCost(state.cost) }}</span>
     //         <span>${buttonName}</span>
-    //         <span class="cooldown" :style="{ width: props.data.timer / props.data.cooldown * 100 + '%' }"></span>
-    //         <span class="sr-only">{{ getSeconds(props.data.timer) }}</span>
+    //         <span class="cooldown" :style="{ width: state.timer / state.cooldown * 100 + '%' }"></span>
+    //         <span class="sr-only">{{ getSeconds(state.timer) }}</span>
     //       </button>
     //     </div>
     //   </div>
