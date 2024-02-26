@@ -1,15 +1,27 @@
 import evaluate from '../evaluate.js';
-import { accessedVars, clearAccessedVars } from '../watcher.js';
+import {
+  accessedPaths,
+  startWatchingPaths,
+  stopWatchingPaths
+} from '../watcher.js';
 
 // 0 is not considered falsey
 const falseyValues = [false, undefined, null, ''];
 
-export default function bindDirective(reactiveNode, scope, directiveNode, name, exp, falsey) {
+export default function bindDirective(
+  reactiveNode,
+  scope,
+  directiveNode,
+  name,
+  exp,
+  falsey
+) {
 
-  clearAccessedVars();
+  startWatchingPaths();
   const value = evaluate(scope, exp);
-  accessedVars.map(variable => {
-    reactiveNode.addEventListener(variable, () => {
+  stopWatchingPaths();
+  accessedPaths.map(path => {
+    reactiveNode.addEventListener(path, () => {
       setAttribute(directiveNode, name, evaluate(scope, exp), falsey);
     });
   });

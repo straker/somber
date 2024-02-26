@@ -10,6 +10,7 @@ export default function walk(reactiveNode, scope, rootNode) {
   while (node = walker.nextNode()) {
     switch (node.nodeType) {
     case 1: // Node.ELEMENT_NODE
+      let hasForBinding = node.hasAttribute(':for');
       for (let { name, value } of [...node.attributes]) {
 
         // only perform logic on bound values
@@ -27,6 +28,11 @@ export default function walk(reactiveNode, scope, rootNode) {
         case 'for':
           forDirective(reactiveNode, scope, node, name, value);
           break;
+        case 'key':
+          if (hasForBinding) {
+            continue;
+          }
+          // intentionally fall through to bind the attribute
         default:
           bindDirective(reactiveNode, scope, node, name, value);
         }

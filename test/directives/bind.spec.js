@@ -52,6 +52,11 @@ describe('bind directive', () => {
       assert.equal(target.getAttribute('aria-foo'), '0');
     });
 
+    it('sets :key when not used with :for', () => {
+      const { target } = setupFixture(`<div id="target" :key="1">hello</div>`);
+      assert.equal(target.getAttribute('key'), '1');
+    });
+
     it('when the binding changes', () => {
       const { target, host } = setupFixture(`<div id="target" :value="state.value">hello</div>`, {
         state: {
@@ -112,6 +117,15 @@ describe('bind directive', () => {
     it('when aria-attribute is ""', () => {
       const { target } = setupFixture(`<div id="target" :aria-foo="">hello</div>`);
       assert.isFalse(target.hasAttribute('aria-foo'));
+    });
+
+    it('when :key is used with :for', () => {
+      const { target } = setupFixture(`<div id="target" :key="1" :for="item in state.items"><span></span></div>`, {
+        state: {
+          items: []
+        }
+      });
+      assert.isFalse(target.hasAttribute('key'));
     });
 
     it('when the binding changes', () => {

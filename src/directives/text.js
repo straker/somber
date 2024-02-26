@@ -1,9 +1,18 @@
 import evaluate from '../evaluate.js';
-import { accessedVars, clearAccessedVars } from '../watcher.js';
+import {
+  accessedPaths,
+  startWatchingPaths,
+  stopWatchingPaths
+} from '../watcher.js';
 
 const expressionRegex = /\{\{.+?\}\}/g;
 
-export default function textDirective(reactiveNode, scope, directiveNode, nodeValue) {
+export default function textDirective(
+  reactiveNode,
+  scope,
+  directiveNode,
+  nodeValue
+) {
   const staticStrings = nodeValue.split(expressionRegex);
   const expressions = nodeValue
     .match(expressionRegex)
@@ -12,10 +21,11 @@ export default function textDirective(reactiveNode, scope, directiveNode, nodeVa
     });
 
   expressions.map(exp => {
-    clearAccessedVars();
+    startWatchingPaths();
     const value = evaluate(scope, exp);
-    accessedVars.map(variable => {
-      reactiveNode.addEventListener(variable, () => {
+    stopWatchingPaths();
+    accessedPaths.map(path => {
+      reactiveNode.addEventListener(path, () => {
         setText(scope, directiveNode, staticStrings, expressions);
       });
     });

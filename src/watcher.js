@@ -1,64 +1,84 @@
+// allow proxy object to output to string rather than error
+Proxy.constructor.toString = () => { return '[object Object]' };
+
+let watching = false;
+let lastAccessedPath = '';
+export const accessedPaths = [];
+
 const handler = {
   get(obj, key) {
-    if (watchedObjects.has(obj)) {
-      const { name } = watchedObjects.get(obj);
-      accessedVars.push(`${name}.${key}`);
+    if (typeof key !== 'string') {
+      return Reflect.get(...arguments);
     }
-    else {
-      accessedVars[accessedVars.length - 1] = accessedVars[accessedVars.length - 1] + '.' + key;
+
+    if (watching) {
+      const path = obj.__p + '.' + key
+      if (lastAccessedPath !== obj.__p) {
+        lastAccessedPath = path;
+        accessedPaths.push(path);
+      }
+      else {
+        lastAccessedPath = path;
+        accessedPaths[accessedPaths.length - 1] = path;
+      }
     }
 
     return Reflect.get(...arguments);
   },
 
   set(obj, key, value) {
-    let variable;
-    if (watchedObjects.has(obj)) {
-      const { name } = watchedObjects.get(obj);
-      variable = `${name}.${key}`
-    }
-    else {
-      variable = accessedVars[accessedVars.length - 1] + '.' + key;
-    }
-
     let newValue;
     if (isObject(value)) {
-      newValue = Reflect.set(obj, key, proxyObject(value, obj._n));
+      newValue = Reflect.set(obj, key, proxyObject(obj.__p + '.' + key, value, obj.__r));
     }
     else {
       newValue = Reflect.set(...arguments)
     }
 
-    obj._n.dispatchEvent(new CustomEvent(variable, {
-      detail: {
-        value,
-        oldValue: obj[key]
-      }
-    }));
+    // fire event for the current object and all parent objects
+    let path = obj.__p + '.' + key;;
+    while (path) {
+      obj.__r.dispatchEvent(new CustomEvent(path, {
+        detail: {
+          value,
+          oldValue: obj[key]
+        }
+      }));
+      const lastIndex = path.lastIndexOf('.');
+      path = path.slice(0, lastIndex !== -1 ? lastIndex : 0);
+    }
 
     return newValue;
   }
 }
 
-const watchedObjects = new Map();
-export const accessedVars = [];
-
 export function watchObject(name, obj, node) {
-  if (watchedObjects.has(obj)) {
-    return watchedObjects.get(obj).proxy;
+  // object has already been watched
+  if (obj.__r) {
+    return obj;
   }
 
-  const proxy = proxyObject(obj, node);
-  watchedObjects.set(obj, { name, proxy });
+  const proxy = proxyObject(name, obj, node);
   return proxy;
 }
 
-function proxyObject(obj, node) {
+function proxyObject(name, obj, node) {
   const proxy = new Proxy(obj, handler);
-  obj._n = node;
+  Object.defineProperties(obj, {
+    // __r = reactive node
+    __r: {
+      value: node,
+      enumerable: false
+    },
+    // __p = object path
+    __p: {
+      value: name,
+      enumerable: false
+    }
+  });
 
   Object.entries(obj).forEach(([key, value]) => {
-    if (isObject(value) && key !== '_n') {
+    if (isObject(value) && !value.__r) {
       // call set with object to turn into proxy
       proxy[key] = value;
     }
@@ -68,9 +88,19 @@ function proxyObject(obj, node) {
 }
 
 function isObject(value) {
-  return typeof value === 'object' && value !== null;
+  return value && typeof value === 'object';
 }
 
-export function clearAccessedVars() {
-  accessedVars.length = 0;
+export function startWatchingPaths() {
+  watching = true;
+  accessedPaths.length = 0;
+  lastAccessedPath = '';
 }
+
+export function stopWatchingPaths() {
+  watching = false;
+}
+
+window.accessedPaths = accessedPaths;
+window.startWatchingPaths = startWatchingPaths;
+window.stopWatchingPaths = stopWatchingPaths;
