@@ -1,26 +1,27 @@
+import { emit } from './events.js';
+
 // allow proxy object to output to string rather than error
 Proxy.constructor.toString = () => { return '[object Object]' };
+const defineProps = Object.defineProperties;
 
 let watching = false;
-let lastAccessedPath = '';
+let lastAccessed = {};
 export const accessedPaths = [];
 
 const handler = {
-  get(obj, key) {
-    if (typeof key !== 'string') {
+  get(obj, key, count) {
+    if (!watching || typeof key !== 'string') {
       return Reflect.get(...arguments);
     }
 
-    if (watching) {
-      const path = obj.__p + '.' + key
-      if (lastAccessedPath !== obj.__p) {
-        lastAccessedPath = path;
-        accessedPaths.push(path);
-      }
-      else {
-        lastAccessedPath = path;
-        accessedPaths[accessedPaths.length - 1] = path;
-      }
+    const value = obj[key];
+
+    if (!isObject(value) || !lastAccessed.obj) {
+      lastAccessed = {};
+      accessedPaths.push({ obj, key, value });
+    }
+    else {
+      accessedPaths[accessedPaths.length - 1] = { obj, key, value };
     }
 
     return Reflect.get(...arguments);
@@ -29,56 +30,44 @@ const handler = {
   set(obj, key, value) {
     let newValue;
     if (isObject(value)) {
-      newValue = Reflect.set(obj, key, proxyObject(obj.__p + '.' + key, value, obj.__r));
+      newValue = Reflect.set(obj, key, proxyObject(value));
     }
     else {
       newValue = Reflect.set(...arguments)
     }
 
     // fire event for the current object and all parent objects
-    let path = obj.__p + '.' + key;;
-    while (path) {
-      obj.__r.dispatchEvent(new CustomEvent(path, {
-        detail: {
-          value,
-          oldValue: obj[key]
-        }
-      }));
-      const lastIndex = path.lastIndexOf('.');
-      path = path.slice(0, lastIndex !== -1 ? lastIndex : 0);
-    }
+    emit(obj, key);
 
     return newValue;
   }
 }
 
-export function watchObject(name, obj, node) {
-  // object has already been watched
-  if (obj.__r) {
+export function watchObject(obj) {
+  if (alreadyProxied(obj)) {
     return obj;
   }
 
-  const proxy = proxyObject(name, obj, node);
-  return proxy;
-}
-
-function proxyObject(name, obj, node) {
-  const proxy = new Proxy(obj, handler);
-  Object.defineProperties(obj, {
-    // __r = reactive node
-    __r: {
-      value: node,
-      enumerable: false
-    },
-    // __p = object path
-    __p: {
-      value: name,
-      enumerable: false
-    }
+  // root proxy object
+  Object.defineProperty(obj, '__p', {
+    value: null,
+    enumberable: false
   });
 
-  Object.entries(obj).forEach(([key, value]) => {
-    if (isObject(value) && !value.__r) {
+  return proxyObject(obj);
+}
+
+function proxyObject(obj) {
+  const proxy = new Proxy(obj, handler);
+
+  Object.entries(obj).map(([key, value]) => {
+    if (isObject(value) && !alreadyProxied(value)) {
+      // keep track of the parent object so we can emit up the
+      // entire object ancestry
+      Object.defineProperty(value, '__p', {
+        value: { obj, key },
+        enumberable: false
+      });
       // call set with object to turn into proxy
       proxy[key] = value;
     }
@@ -91,16 +80,16 @@ function isObject(value) {
   return value && typeof value === 'object';
 }
 
+function alreadyProxied(obj) {
+  return '__p' in obj;
+}
+
 export function startWatchingPaths() {
   watching = true;
   accessedPaths.length = 0;
-  lastAccessedPath = '';
+  lastAccessed = {};
 }
 
 export function stopWatchingPaths() {
   watching = false;
 }
-
-window.accessedPaths = accessedPaths;
-window.startWatchingPaths = startWatchingPaths;
-window.stopWatchingPaths = stopWatchingPaths;

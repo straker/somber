@@ -21,7 +21,7 @@ export default function bindDirective(
   const value = evaluate(scope, exp);
   stopWatchingPaths();
   accessedPaths.map(path => {
-    reactiveNode.addEventListener(path, () => {
+    reactiveNode.on(path.obj, path.key, () => {
       setAttribute(directiveNode, name, evaluate(scope, exp), falsey);
     });
   });
@@ -31,6 +31,11 @@ export default function bindDirective(
 
 function setAttribute(node, name, value, falsey) {
   value = falsey ? !value : value;
+
+  // TODO: is this how i want to do this?
+  node.props ??= {}
+  node.props[name] = value;
+
   const ariaAttr = name.startsWith('aria-');
 
   // class attribute will be set with an object

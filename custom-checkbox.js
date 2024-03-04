@@ -1,17 +1,17 @@
 import CustomElement from './src/custom-element.js';
 
 class CustomCheckbox extends CustomElement {
-  static observedAttributes = ['label', 'checked', 'foo'];
+  static observedAttributes = ['label'];
 
   constructor() {
     super()
-    this.state.checked = undefined;
+    this.state.checked = true;
+    this.bar = 10;
+    console.log({...this })
   }
 
   render() {
-    const { label } = this.props;
-    const { checked } = this.state;
-    return this.html`<label>${label} <input type="checkbox" checked="${checked}" aria-hidden="${checked}"/></label>`
+    return this.html`<label>{{ props.label.label }} <input type="checkbox" :checked="state.checked"/></label>`
   }
 }
 

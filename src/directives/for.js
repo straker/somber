@@ -1,6 +1,11 @@
 import evaluate from '../evaluate.js';
 import walk from '../walk.js';
-import { watchObject } from '../watcher.js';
+import {
+  watchObject,
+  accessedPaths,
+  startWatchingPaths,
+  stopWatchingPaths
+} from '../watcher.js';
 
 const destructuredRegex = /\(\s*(?<value>\w+),\s*(?<key>\w+),?\s*(?<index>\w+)?\s*\)/
 
@@ -16,17 +21,61 @@ export default function forDirective(
     throw new Error(`invalid :for expression: ${exp}`)
   }
 
-  const template = directiveNode.firstElementChild;
-  const iterable = evaluate(scope, iterator);
-
   let key;
   let index;
   if (value.startsWith('(')) {
     ({ value, key, index } = value.match(destructuredRegex).groups);
   }
 
+  const template = directiveNode.firstElementChild;
   const forKey = directiveNode.getAttribute(':key');
   directiveNode.removeAttribute(':key');
+
+  startWatchingPaths();
+  const iterable = evaluate(scope, iterator);
+  stopWatchingPaths();
+  accessedPaths.map(path => {
+    reactiveNode.on(path.obj, path.key, () => {
+      const children = createChildren(
+        reactiveNode,
+        scope,
+        directiveNode,
+        template,
+        iterator,
+        iterable,
+        value,
+        key,
+        index,
+        forKey
+      );
+
+      // TODO: what should happen if the browser is currently
+      // focused on an element that is a child of the node that
+      // will be removed / replaced?
+
+      if (!forKey) {
+        removeChildren(directiveNode);
+        return directiveNode.append(...children);
+      }
+
+      children.map((child, index) => {
+        const currChild = directiveNode.children[index];
+
+        // new item
+        if (!currChild) {
+          return directiveNode.appendChild(child);
+        }
+
+        // same item
+        if (currChild.__k === child.__k) {
+          return;
+        }
+
+        // changed item
+        currChild.replaceWith(child);
+      });
+    });
+  });
 
   const children = createChildren(
     reactiveNode,
@@ -44,47 +93,6 @@ export default function forDirective(
   // scope with the new values
   removeChildren(directiveNode);
   directiveNode.append(...children);
-
-  reactiveNode.addEventListener(iterator, () => {
-    const children = createChildren(
-      reactiveNode,
-      scope,
-      directiveNode,
-      template,
-      iterator,
-      iterable,
-      value,
-      key,
-      index,
-      forKey
-    );
-
-    // TODO: what should happen if the browser is currently
-    // focused on an element that is a child of the node that
-    // will be removed / replaced?
-
-    if (!forKey) {
-      removeChildren(directiveNode);
-      return directiveNode.append(...children);
-    }
-
-    children.map((child, index) => {
-      const currChild = directiveNode.children[index];
-
-      // new item
-      if (!currChild) {
-        return directiveNode.appendChild(child);
-      }
-
-      // same item
-      if (currChild.__k === child.__k) {
-        return;
-      }
-
-      // changed item
-      currChild.replaceWith(child);
-    });
-  });
 }
 
 function removeChildren(directiveNode) {
@@ -107,16 +115,17 @@ function createChildren(
 ) {
   if (Array.isArray(iterable)) {
     return iterable.map((item, index) => {
-      const ctx = watchObject(iterator + '.' + index, {
-        ...scope,
-        // TODO: updating the value reference needs to trigger
-        // an update, but to do so this ctx object needs to be
-        // watched
-        get [value]() {
-          return iterable[index]
-        },
-        [key]: index
-      }, reactiveNode, false);
+      const ctx = watchObject(
+        {
+          ...scope,
+          // use a getter so when the state is updated the scope
+          // value reflects the current state of the iterable
+          get [value]() {
+            return iterable[index]
+          },
+          [key]: index
+        }
+      );
       return createChild(
         reactiveNode,
         ctx,
@@ -130,7 +139,9 @@ function createChildren(
   return Object.entries(iterable).map(([objKey, objValue], objIndex) => {
     const ctx = {
       ...scope,
-      [value]: objValue,
+      get [value]() {
+        return iterable[objKey];
+      },
       [key]: objKey,
       [index]: objIndex
     };

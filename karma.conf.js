@@ -3,7 +3,7 @@ module.exports = function (config) {
     basePath: '',
     singleRun: false,
     autoWatch: true,
-    frameworks: ['mocha', 'chai'],
+    frameworks: ['mocha', 'chai', 'sinon'],
     files: [
       { pattern: 'src/**/*.js', type: 'module', included: false },
       { pattern: 'test/utils.js', type: 'module', included: false },

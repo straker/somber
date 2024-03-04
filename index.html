@@ -5,27 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title></title>
   <style>
-    button {
-      position: relative;
-      background: white;
-      padding: 5px 10px;
-      width: 200px;
-      text-align: left;
-    }
-
-    .cooldown {
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      background: rgba(0,0,0,.2);
-    }
   </style>
 </head>
 <body>
-  <!-- <custom-checkbox label="hello world" checked="false" foo="{ hello: 'world', 'foo': true }"></custom-checkbox> -->
-  <resource-icon data="['Wood', true]" hello=" world " thing="{foo: 'bar'}"></resource-icon>
+  <app-root></app-root>
+
+  <script>
+    setTimeout(()=> console.log('here'))
+    console.log('bar');
+  </script>
+  <script src="app-root.js" type="module"></script>
   <script src="custom-checkbox.js" type="module"></script>
-  <script src="resource-icon.js" type="module"></script>
 </body>
 </html>

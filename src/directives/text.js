@@ -25,7 +25,7 @@ export default function textDirective(
     const value = evaluate(scope, exp);
     stopWatchingPaths();
     accessedPaths.map(path => {
-      reactiveNode.addEventListener(path, () => {
+      reactiveNode.on(path.obj, path.key, () => {
         setText(scope, directiveNode, staticStrings, expressions);
       });
     });
