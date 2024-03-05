@@ -1,4 +1,5 @@
 const callbacks = new WeakMap();
+window.callbacks = callbacks
 
 export function on(obj, key, callback) {
   let cbs = callbacks.get(obj);
@@ -18,6 +19,14 @@ export function off(obj, key, callback) {
   }
 
   cbs[key] = cbs[key].filter(cb => cb != callback);
+
+  // cleanup memory pointers to objects
+  if (!cbs[key].length) {
+    delete cbs[key];
+  }
+  if (!Object.keys(cbs).length) {
+    callbacks.delete(obj);
+  }
 }
 
 export function emit(obj, key, ...args) {

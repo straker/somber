@@ -39,3 +39,7 @@ export function wait(ms) {
     setTimeout(resolve, ms);
   });
 }
+
+export function getFixture() {
+  return fixture;
+}

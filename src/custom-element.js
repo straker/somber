@@ -27,10 +27,6 @@ export default class CustomElement extends HTMLElement {
     this._cbs.map(args => off(...args));
   }
 
-  // attributeChangedCallback(name, oldValue, value) {
-  //   this.dispatchEvent(new CustomEvent('props.' + name));
-  // }
-
   html(str) {
     template.innerHTML = str;
     walk(this, this, template.content.firstElementChild);
@@ -38,4 +34,3 @@ export default class CustomElement extends HTMLElement {
     return template.content.firstElementChild;
   }
 }
-window.CustomElement = CustomElement;

@@ -1,5 +1,5 @@
 import CustomElement from '../../src/custom-element.js';
-import { setupFixture } from '../utils.js';
+import { setupFixture } from '../testutils.js';
 
 describe('text directive', () => {
   it('removes the binding syntax', () => {

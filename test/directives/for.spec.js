@@ -1,5 +1,5 @@
 import CustomElement from '../../src/custom-element.js';
-import { setupFixture, wait } from '../utils.js';
+import { setupFixture } from '../testutils.js';
 
 describe('for directive', () => {
   it('removes the binding attribute', () => {

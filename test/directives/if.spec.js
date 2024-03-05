@@ -1,5 +1,5 @@
 import CustomElement from '../../src/custom-element.js';
-import { setupFixture } from '../utils.js';
+import { setupFixture } from '../testutils.js';
 
 describe('if directive', () => {
   it('removes the :if attribute', () => {

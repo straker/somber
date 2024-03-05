@@ -6,7 +6,7 @@ module.exports = function (config) {
     frameworks: ['mocha', 'chai', 'sinon'],
     files: [
       { pattern: 'src/**/*.js', type: 'module', included: false },
-      { pattern: 'test/utils.js', type: 'module', included: false },
+      { pattern: 'test/testutils.js', type: 'module', included: false },
       { pattern: 'test/**/*.spec.js', type: 'module' },
     ],
     browsers: ['ChromeHeadless'],

@@ -4,6 +4,15 @@ import textDirective from './directives/text.js';
 import forDirective from './directives/for.js';
 import eventDirective from './directives/event.js';
 
+// for testing purposes only
+export const _directives = {
+  bind: bindDirective,
+  if: ifDirective,
+  text: textDirective,
+  for: forDirective,
+  event: eventDirective
+};
+
 export default function walk(reactiveNode, scope, rootNode) {
   const walker = document.createNodeIterator(rootNode, NodeFilter.SHOW_ALL);
   let node;
@@ -23,26 +32,14 @@ export default function walk(reactiveNode, scope, rootNode) {
         node.removeAttribute(name);
         name = name.substr(1);
 
-        if (type === '@') {
-          eventDirective(reactiveNode, scope, node, name, value);
+        if (name === 'key' && hasForBinding) {
           continue;
         }
 
-        switch(name) {
-        case 'if':
-          ifDirective(reactiveNode, scope, node, name, value);
-          break;
-        case 'for':
-          forDirective(reactiveNode, scope, node, name, value);
-          break;
-        case 'key':
-          if (hasForBinding) {
-            continue;
-          }
-          // intentionally fall through to bind the attribute
-        default:
-          bindDirective(reactiveNode, scope, node, name, value);
-        }
+        const directive = type === '@'
+          ? _directives.event
+          : _directives[name] ?? _directives.bind
+        directive(reactiveNode, scope, node, name, value);
       }
       break;
     case 3: // Node.TEXT_NODE
@@ -51,7 +48,7 @@ export default function walk(reactiveNode, scope, rootNode) {
         continue;
       }
 
-      textDirective(reactiveNode, scope, node, node.nodeValue);
+      _directives.text(reactiveNode, scope, node, node.nodeValue);
     }
   }
 }
