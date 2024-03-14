@@ -7,7 +7,8 @@ import {
   stopWatchingPaths
 } from '../watcher.js';
 
-const destructuredRegex = /\(\s*(?<value>\w+),\s*(?<key>\w+),?\s*(?<index>\w+)?\s*\)/
+const destructuredRegex =
+  /\(\s*(?<value>\w+),\s*(?<key>\w+),?\s*(?<index>\w+)?\s*\)/;
 
 export default function forDirective(
   reactiveNode,
@@ -16,13 +17,12 @@ export default function forDirective(
   name,
   exp
 ) {
-  let [ value, iterator ] = exp.split(' in ').map(part => part.trim());
+  let [value, iterator] = exp.split(' in ').map(part => part.trim());
   if (!iterator) {
-    throw new Error(`invalid :for expression: ${exp}`)
+    throw new Error(`invalid :for expression: ${exp}`);
   }
 
-  let key;
-  let index;
+  let key, index;
   if (value.startsWith('(')) {
     ({ value, key, index } = value.match(destructuredRegex).groups);
   }
@@ -67,7 +67,7 @@ export default function forDirective(
         }
 
         // same item
-        if (currChild.__k === child.__k) {
+        if (currChild.__k == child.__k) {
           return;
         }
 
@@ -115,17 +115,15 @@ function createChildren(
 ) {
   if (Array.isArray(iterable)) {
     return iterable.map((item, index) => {
-      const ctx = watchObject(
-        {
-          ...scope,
-          // use a getter so when the state is updated the scope
-          // value reflects the current state of the iterable
-          get [value]() {
-            return iterable[index]
-          },
-          [key]: index
-        }
-      );
+      const ctx = watchObject({
+        ...scope,
+        // use a getter so when the state is updated the scope
+        // value reflects the current state of the iterable
+        get [value]() {
+          return iterable[index];
+        },
+        [key]: index
+      });
       return createChild(
         reactiveNode,
         ctx,
@@ -136,7 +134,7 @@ function createChildren(
     });
   }
 
-  return Object.entries(iterable).map(([objKey, objValue], objIndex) => {
+  return Object.keys(iterable).map((objKey, objIndex) => {
     const ctx = {
       ...scope,
       get [value]() {
@@ -155,13 +153,7 @@ function createChildren(
   });
 }
 
-function createChild(
-  reactiveNode,
-  scope,
-  node,
-  template,
-  forKey
-) {
+function createChild(reactiveNode, scope, node, template, forKey) {
   const child = template.cloneNode(true);
   // __k = key
   child.__k = evaluate(scope, forKey);

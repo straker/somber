@@ -4,6 +4,7 @@ import {
   startWatchingPaths,
   stopWatchingPaths
 } from '../watcher.js';
+import { emit } from '../events.js';
 
 // 0 is not considered falsey
 const falseyValues = [false, undefined, null, ''];
@@ -16,7 +17,6 @@ export default function bindDirective(
   exp,
   falsey
 ) {
-
   startWatchingPaths();
   const value = evaluate(scope, exp);
   stopWatchingPaths();
@@ -32,9 +32,23 @@ export default function bindDirective(
 function setAttribute(node, name, value, falsey) {
   value = falsey ? !value : value;
 
-  // TODO: is this how i want to do this?
-  node.props ??= {}
-  node.props[name] = value;
+  // set component props
+  if (
+    customElements
+      .get(node.nodeName.toLowerCase())
+      ?.observedAttributes?.includes(name)
+  ) {
+    Object.defineProperty(node, name, {
+      get() {
+        accessedPaths.push({ obj: node, key: name, value });
+        return value;
+      },
+      configurable: true
+    });
+
+    emit(node, name);
+    return;
+  }
 
   const ariaAttr = name.startsWith('aria-');
 
@@ -56,10 +70,10 @@ function setAttribute(node, name, value, falsey) {
       // allow 0 value
       // @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/style
       if (falseyValues.includes(condition)) {
-        return node.style[propName] = '';
+        return (node.style[propName] = '');
       }
 
-      node.style[propName] = condition
+      node.style[propName] = condition;
     });
   }
 
@@ -72,6 +86,7 @@ function setAttribute(node, name, value, falsey) {
 
     // boolean attributes should be set with empty value
     // @see https://developer.mozilla.org/en-US/docs/Web/API/Element/setAttribute#value
+    // eslint-disable-next-line no-restricted-syntax
     if (value === true) {
       value = '';
     }
@@ -79,6 +94,7 @@ function setAttribute(node, name, value, falsey) {
     return node.setAttribute(name, value);
   }
 
+  // eslint-disable-next-line no-restricted-syntax
   if (value === false) {
     return node.setAttribute(name, 'false');
   }
@@ -86,7 +102,6 @@ function setAttribute(node, name, value, falsey) {
   else if (falseyValues.includes(value)) {
     return node.removeAttribute(name);
   }
-
 
   node.setAttribute(name, value);
 }

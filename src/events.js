@@ -1,11 +1,11 @@
-const callbacks = new WeakMap();
-window.callbacks = callbacks
+// export for testing purposes only
+export const _callbacks = new WeakMap();
 
 export function on(obj, key, callback) {
-  let cbs = callbacks.get(obj);
+  let cbs = _callbacks.get(obj);
   if (!cbs) {
     cbs = {};
-    callbacks.set(obj, cbs);
+    _callbacks.set(obj, cbs);
   }
 
   cbs[key] = cbs[key] ?? [];
@@ -13,7 +13,7 @@ export function on(obj, key, callback) {
 }
 
 export function off(obj, key, callback) {
-  const cbs = callbacks.get(obj);
+  const cbs = _callbacks.get(obj);
   if (!cbs?.[key]) {
     return;
   }
@@ -25,12 +25,12 @@ export function off(obj, key, callback) {
     delete cbs[key];
   }
   if (!Object.keys(cbs).length) {
-    callbacks.delete(obj);
+    _callbacks.delete(obj);
   }
 }
 
 export function emit(obj, key, ...args) {
-  const cbs = callbacks.get(obj);
+  const cbs = _callbacks.get(obj);
   if (cbs?.[key]) {
     cbs[key].map(callback => callback(...args));
   }

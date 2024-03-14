@@ -1,11 +1,11 @@
 import CustomElement from './src/custom-element.js';
-import './custom-checkbox.js';
+import './custom-checkbox.js'; // must bring in first
 
 class AppRoot extends CustomElement {
   static observedAttributes = ['label', 'checked', 'foo'];
 
   constructor() {
-    super()
+    super();
     this.state = {
       label: 'foobar',
       thing: {
@@ -13,13 +13,13 @@ class AppRoot extends CustomElement {
           bar: 'hi'
         }
       }
-    }
+    };
   }
 
   render() {
     return this.html(`
       <form>
-        <custom-checkbox :label="state"></custom-checkbox>
+        <custom-checkbox :label="state.label" :data="state"></custom-checkbox>
       </form>
     `);
   }

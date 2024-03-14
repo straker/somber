@@ -1,16 +1,17 @@
 import { emit } from './events.js';
 
 // allow proxy object to output to string rather than error
-Proxy.constructor.toString = () => { return '[object Object]' };
-const defineProps = Object.defineProperties;
+Proxy.constructor.toString = () => {
+  return '[object Object]';
+};
 
 let watching = false;
 let lastAccessed = {};
 export const accessedPaths = [];
 
 const handler = {
-  get(obj, key, count) {
-    if (!watching || typeof key !== 'string') {
+  get(obj, key) {
+    if (!watching || typeof key != 'string') {
       return Reflect.get(...arguments);
     }
 
@@ -19,8 +20,7 @@ const handler = {
     if (!isObject(value) || !lastAccessed.obj) {
       lastAccessed = {};
       accessedPaths.push({ obj, key, value });
-    }
-    else {
+    } else {
       accessedPaths[accessedPaths.length - 1] = { obj, key, value };
     }
 
@@ -31,9 +31,8 @@ const handler = {
     let newValue;
     if (isObject(value)) {
       newValue = Reflect.set(obj, key, proxyObject(value));
-    }
-    else {
-      newValue = Reflect.set(...arguments)
+    } else {
+      newValue = Reflect.set(...arguments);
     }
 
     // fire event for the current object and all parent objects
@@ -41,7 +40,7 @@ const handler = {
 
     return newValue;
   }
-}
+};
 
 export function watchObject(obj) {
   if (alreadyProxied(obj)) {
@@ -77,7 +76,7 @@ function proxyObject(obj) {
 }
 
 function isObject(value) {
-  return value && typeof value === 'object';
+  return value && typeof value == 'object';
 }
 
 function alreadyProxied(obj) {

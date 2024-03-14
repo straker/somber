@@ -5,26 +5,25 @@ import { on, off } from './events.js';
 const template = document.createElement('template');
 
 export default class CustomElement extends HTMLElement {
+  #cbs = [];
+
   constructor() {
-    super()
+    super();
     this.state = {};
-    this.props ??= {};
-    this._cbs = [];
   }
 
   connectedCallback() {
     this.state = watchObject(this.state);
-    this.props = watchObject(this.props);
     this.appendChild(this.render());
   }
 
   on(obj, key, callback) {
     on(obj, key, callback);
-    this._cbs.push([obj, key, callback]);
+    this.#cbs.push([obj, key, callback]);
   }
 
   disconnectedCallback() {
-    this._cbs.map(args => off(...args));
+    this.#cbs.map(args => off(...args));
   }
 
   html(str) {

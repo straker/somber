@@ -14,30 +14,36 @@ export default function textDirective(
   nodeValue
 ) {
   const staticStrings = nodeValue.split(expressionRegex);
-  const expressions = nodeValue
-    .match(expressionRegex)
-    .map(expStr => {
-      return expStr.slice(2, -2).trim();
-    });
+  const expressions = nodeValue.match(expressionRegex).map(expStr => {
+    return expStr.slice(2, -2).trim();
+  });
 
-  expressions.map(exp => {
+  const expressionValues = [];
+  expressions.map((exp, index) => {
     startWatchingPaths();
     const value = evaluate(scope, exp);
     stopWatchingPaths();
+    expressionValues.push(value);
     accessedPaths.map(path => {
       reactiveNode.on(path.obj, path.key, () => {
-        setText(scope, directiveNode, staticStrings, expressions);
+        expressionValues[index] = evaluate(scope, expressions[index]);
+        setText(
+          scope,
+          directiveNode,
+          staticStrings,
+          expressionValues
+        );
       });
     });
   });
 
-  setText(scope, directiveNode, staticStrings, expressions);
+  setText(scope, directiveNode, staticStrings, expressionValues);
 }
 
-function setText(scope, node, staticStrings, expressions) {
+function setText(scope, node, staticStrings, expressionValues) {
   let nodeValue = staticStrings[0];
-  for (let i = 0; i < expressions.length; i++) {
-    nodeValue += evaluate(scope, expressions[i]) + staticStrings[i + 1];
+  for (let i = 0; i < expressionValues.length; i++) {
+    nodeValue += expressionValues[i] + staticStrings[i + 1];
   }
 
   node.nodeValue = nodeValue;

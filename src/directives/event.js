@@ -13,7 +13,7 @@ export default function eventDirective(
       $event
     };
     const value = evaluate(ctx, exp);
-    if (typeof value === 'function') {
+    if (typeof value == 'function') {
       value($event);
     }
   });
