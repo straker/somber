@@ -84,7 +84,8 @@ function isProxied(obj) {
 function proxyObject(obj) {
   const proxy = new Proxy(obj, handler);
 
-  // root proxy object
+  // keep track of the original object so we can track
+  // the object that will be accessed next in a chain
   Object.defineProperty(proxy, '__s', {
     value: obj,
     enumberable: false
