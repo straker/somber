@@ -3,7 +3,6 @@ import CustomElement from '../src/custom-element.js';
 let fixture, html;
 
 before(() => {
-  console.log('here');
   fixture = document.createElement('div');
   fixture.setAttribute('id', 'fixture');
   document.body.appendChild(fixture);

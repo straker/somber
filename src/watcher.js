@@ -6,22 +6,26 @@ Proxy.constructor.toString = () => {
 };
 
 let watching = false;
-let lastAccessed = {};
+let next;
 export const accessedPaths = [];
 
 const handler = {
   get(obj, key) {
-    if (!watching || typeof key != 'string') {
+    if (!watching || typeof key != 'string' || key.startsWith('__')) {
       return Reflect.get(...arguments);
     }
 
-    const value = obj[key];
-
-    if (!isObject(value) || !lastAccessed.obj) {
-      lastAccessed = {};
-      accessedPaths.push({ obj, key, value });
+    if (next != obj) {
+      accessedPaths.push({ obj, key });
     } else {
-      accessedPaths[accessedPaths.length - 1] = { obj, key, value };
+      accessedPaths[accessedPaths.length - 1] = { obj, key };
+    }
+
+    const value = obj[key];
+    if (!isObject(value)) {
+      next = null;
+    } else {
+      next = value.__s;
     }
 
     return Reflect.get(...arguments);
@@ -31,6 +35,13 @@ const handler = {
     let newValue;
     if (isObject(value)) {
       newValue = Reflect.set(obj, key, proxyObject(value));
+
+      // keep track of the parent object so we can emit up the
+      // entire object ancestry
+      Object.defineProperty(value, '__p', {
+        value: { obj, key },
+        enumberable: false
+      });
     } else {
       newValue = Reflect.set(...arguments);
     }
@@ -43,7 +54,7 @@ const handler = {
 };
 
 export function watchObject(obj) {
-  if (alreadyProxied(obj)) {
+  if (isProxied(obj)) {
     return obj;
   }
 
@@ -56,18 +67,31 @@ export function watchObject(obj) {
   return proxyObject(obj);
 }
 
+export function startWatchingPaths() {
+  watching = true;
+  accessedPaths.length = 0;
+  next = null;
+}
+
+export function stopWatchingPaths() {
+  watching = false;
+}
+
+function isProxied(obj) {
+  return '__p' in obj;
+}
+
 function proxyObject(obj) {
   const proxy = new Proxy(obj, handler);
 
+  // root proxy object
+  Object.defineProperty(proxy, '__s', {
+    value: obj,
+    enumberable: false
+  });
+
   Object.entries(obj).map(([key, value]) => {
-    if (isObject(value) && !alreadyProxied(value)) {
-      // keep track of the parent object so we can emit up the
-      // entire object ancestry
-      Object.defineProperty(value, '__p', {
-        value: { obj, key },
-        enumberable: false
-      });
-      // call set with object to turn into proxy
+    if (isObject(value) && !isProxied(value)) {
       proxy[key] = value;
     }
   });
@@ -77,18 +101,4 @@ function proxyObject(obj) {
 
 function isObject(value) {
   return value && typeof value == 'object';
-}
-
-function alreadyProxied(obj) {
-  return '__p' in obj;
-}
-
-export function startWatchingPaths() {
-  watching = true;
-  accessedPaths.length = 0;
-  lastAccessed = {};
-}
-
-export function stopWatchingPaths() {
-  watching = false;
 }

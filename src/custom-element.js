@@ -14,7 +14,10 @@ export default class CustomElement extends HTMLElement {
 
   connectedCallback() {
     this.state = watchObject(this.state);
-    this.appendChild(this.render());
+
+    if (this.render) {
+      this.appendChild(this.render());
+    }
   }
 
   on(obj, key, callback) {
