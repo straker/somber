@@ -1,16 +1,18 @@
 import bindDirective from './directives/bind.js';
-import ifDirective from './directives/if.js';
-import textDirective from './directives/text.js';
-import forDirective from './directives/for.js';
 import eventDirective from './directives/event.js';
+import forDirective from './directives/for.js';
+import ifDirective from './directives/if.js';
+import modelDirective from './directives/model.js';
+import textDirective from './directives/text.js';
 
 // export for testing purposes only
 export const _directives = {
   bind: bindDirective,
-  if: ifDirective,
-  text: textDirective,
+  event: eventDirective,
   for: forDirective,
-  event: eventDirective
+  if: ifDirective,
+  model: modelDirective,
+  text: textDirective
 };
 
 export default function walk(reactiveNode, scope, rootNode) {

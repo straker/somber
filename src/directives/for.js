@@ -34,8 +34,9 @@ export default function forDirective(
   startWatchingPaths();
   const iterable = evaluate(scope, iterator);
   stopWatchingPaths();
-  accessedPaths.map(path => {
-    reactiveNode.on(path.obj, path.key, () => {
+
+  accessedPaths.map(({ obj, key }) => {
+    reactiveNode.on(obj, key, () => {
       const children = createChildren(
         reactiveNode,
         scope,

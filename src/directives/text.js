@@ -24,8 +24,9 @@ export default function textDirective(
     const value = evaluate(scope, exp);
     stopWatchingPaths();
     expressionValues.push(value);
-    accessedPaths.map(path => {
-      reactiveNode.on(path.obj, path.key, () => {
+
+    accessedPaths.map(({ obj, key }) => {
+      reactiveNode.on(obj, key, () => {
         expressionValues[index] = evaluate(scope, expressions[index]);
         setText(
           scope,

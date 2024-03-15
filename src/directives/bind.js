@@ -20,8 +20,9 @@ export default function bindDirective(
   startWatchingPaths();
   const value = evaluate(scope, exp);
   stopWatchingPaths();
-  accessedPaths.map(path => {
-    reactiveNode.on(path.obj, path.key, () => {
+
+  accessedPaths.map(({ obj, key }) => {
+    reactiveNode.on(obj, key, () => {
       setAttribute(directiveNode, name, evaluate(scope, exp), falsey);
     });
   });
