@@ -1,12 +1,12 @@
 import CustomElement from '../src/custom-element.js';
-import { getFixture } from './testutils.js';
+import { getFixture, setupFixture } from './testutils.js';
 import { _callbacks } from '../src/events.js';
 
 describe('CustomElement', () => {
-  customElements.define(
-    'custom-component',
-    class CustomComponent extends CustomElement {}
-  );
+  class CustomComponent extends CustomElement {
+    static observedAttributes = ['value'];
+  }
+  customElements.define('custom-component', CustomComponent);
 
   let fixture;
   before(() => {
@@ -93,6 +93,128 @@ describe('CustomElement', () => {
       `);
       assert.equal(dom.getAttribute('foo'), '1');
       assert.equal(dom.textContent.trim(), '1');
+    });
+  });
+
+  describe('props', () => {
+    it('allows binding to props', () => {
+      const { target } = setupFixture(
+        `<custom-component id="target" :value="state.foo">`,
+        {
+          state: {
+            foo: 'bar'
+          }
+        }
+      );
+      target.appendChild(
+        target.html(`
+        <div :aria-label="value">
+          <span>{{ value }}</span>
+        </div>
+      `)
+      );
+      assert.equal(
+        target.querySelector('div').getAttribute('aria-label'),
+        'bar'
+      );
+      assert.equal(target.textContent.trim(), 'bar');
+    });
+
+    it('updates bindings when prop changes', () => {
+      const { target, host } = setupFixture(
+        `<custom-component id="target" :value="state.foo">`,
+        {
+          state: {
+            foo: 'bar'
+          }
+        }
+      );
+      target.appendChild(
+        target.html(`
+        <div :aria-label="value">
+          <span>{{ value }}</span>
+        </div>
+      `)
+      );
+      host.state.foo = 'hello';
+      assert.equal(
+        target.querySelector('div').getAttribute('aria-label'),
+        'hello'
+      );
+      assert.equal(target.textContent.trim(), 'hello');
+    });
+
+    it('allows props of static objects', () => {
+      const { target } = setupFixture(
+        `<custom-component id="target" :value="{ foo: { bar: { baz: 'hello' }}}">`
+      );
+      target.appendChild(
+        target.html(`
+        <div :aria-label="value.foo.bar.baz">
+          <span>{{ value.foo.bar.baz }}</span>
+        </div>
+      `)
+      );
+      assert.equal(
+        target.querySelector('div').getAttribute('aria-label'),
+        'hello'
+      );
+      assert.equal(target.textContent.trim(), 'hello');
+    });
+
+    it('allows props of bound objects', () => {
+      const { target } = setupFixture(
+        `<custom-component id="target" :value="state">`,
+        {
+          state: {
+            foo: {
+              bar: {
+                baz: 'hello'
+              }
+            }
+          }
+        }
+      );
+      target.appendChild(
+        target.html(`
+        <div :aria-label="value.foo.bar.baz">
+          <span>{{ value.foo.bar.baz }}</span>
+        </div>
+      `)
+      );
+      assert.equal(
+        target.querySelector('div').getAttribute('aria-label'),
+        'hello'
+      );
+      assert.equal(target.textContent.trim(), 'hello');
+    });
+
+    it('updates bindings when object props changes', () => {
+      const { target, host } = setupFixture(
+        `<custom-component id="target" :value="state">`,
+        {
+          state: {
+            foo: {
+              bar: {
+                baz: 'hello'
+              }
+            }
+          }
+        }
+      );
+      target.appendChild(
+        target.html(`
+        <div :aria-label="value.foo.bar.baz">
+          <span>{{ value.foo.bar.baz }}</span>
+        </div>
+      `)
+      );
+      host.state.foo.bar.baz = 'goodbye';
+      assert.equal(
+        target.querySelector('div').getAttribute('aria-label'),
+        'goodbye'
+      );
+      assert.equal(target.textContent.trim(), 'goodbye');
     });
   });
 });

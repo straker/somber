@@ -1,3 +1,4 @@
+import CustomElement from '../custom-element.js';
 import evaluate from '../evaluate.js';
 import {
   accessedPaths,
@@ -33,18 +34,21 @@ export default function bindDirective(
 function setAttribute(node, name, value, falsey) {
   value = falsey ? !value : value;
 
-  // set component props
-  // TODO: tests (in both bind and custom-element)
+  // set component props on vue-lite components only, otherwise
+  // set binding normally (that way we can handle normal custom
+  // elements with observed attributes')
+  const element = customElements.get(node.nodeName.toLowerCase());
   if (
-    customElements
-      .get(node.nodeName.toLowerCase())
-      ?.observedAttributes?.includes(name)
+    element &&
+    element.prototype instanceof CustomElement &&
+    element.observedAttributes?.includes(name)
   ) {
     Object.defineProperty(node, name, {
       get() {
-        accessedPaths.push({ obj: node, key: name, value });
+        accessedPaths.push({ obj: node, key: name });
         return value;
       },
+      set(value) {},
       configurable: true
     });
 

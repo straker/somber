@@ -1,3 +1,4 @@
+import CustomElement from '../../src/custom-element.js';
 import { setupFixture } from '../testutils.js';
 
 describe('bind directive', () => {
@@ -638,6 +639,119 @@ describe('bind directive', () => {
         );
         assert.equal(target.style.border, '');
       });
+    });
+  });
+
+  describe('prop binding', () => {
+    class PropComponent extends CustomElement {}
+    customElements.define('prop-component', PropComponent);
+
+    beforeEach(() => {
+      PropComponent.observedAttributes = ['value'];
+    });
+
+    afterEach(() => {
+      delete PropComponent.observedAttributes;
+    });
+
+    it('binds attribute to observed prop', () => {
+      const { target } = setupFixture(
+        `<prop-component id="target" :value="state.value">
+        </prop-component>`,
+        {
+          state: {
+            value: 'hello'
+          }
+        }
+      );
+      assert.equal(target.value, 'hello');
+    });
+
+    it('does not set attribute for observed prop', () => {
+      const { target } = setupFixture(
+        `<prop-component id="target" :value="state.value">
+        </prop-component>`,
+        {
+          state: {
+            value: 'hello'
+          }
+        }
+      );
+      assert.isFalse(target.hasAttribute('value'));
+    });
+
+    it('updates prop when binding changes', () => {
+      const { target, host } = setupFixture(
+        `<prop-component id="target" :value="state.value">
+        </prop-component>`,
+        {
+          state: {
+            value: 'hello'
+          }
+        }
+      );
+      host.state.value = 'goodbye';
+      assert.equal(target.value, 'goodbye');
+    });
+
+    it('prevents setting prop', () => {
+      const { target } = setupFixture(
+        `<prop-component id="target" :value="state.value">
+        </prop-component>`,
+        {
+          state: {
+            value: 'hello'
+          }
+        }
+      );
+      target.value = 1;
+      assert.equal(target.value, 'hello');
+    });
+
+    it('binds to attribute if prop is not observed', () => {
+      const { target } = setupFixture(
+        `<prop-component id="target" :aria-label="state.value">
+        </prop-component>`,
+        {
+          state: {
+            value: 'hello'
+          }
+        }
+      );
+      assert.equal(target.getAttribute('aria-label'), 'hello');
+    });
+
+    it('binds to attribute if element is not observing attributes', () => {
+      delete PropComponent.observedAttributes;
+      const { target } = setupFixture(
+        `<prop-component id="target" :value="state.value">
+        </prop-component>`,
+        {
+          state: {
+            value: 'hello'
+          }
+        }
+      );
+      assert.equal(target.getAttribute('value'), 'hello');
+    });
+
+    it('binds to attribute if element is not a vue-lite component', () => {
+      customElements.define(
+        'normal-component',
+        class NormalComponent extends HTMLElement {
+          static observedAttributes = ['value'];
+        }
+      );
+      const { target } = setupFixture(
+        `<normal-component id="target" :value="state.value">
+        </normal-component>`,
+        {
+          state: {
+            value: 'hello'
+          }
+        }
+      );
+      assert.equal(target.getAttribute('value'), 'hello');
     });
   });
 });

@@ -1,4 +1,5 @@
 import CustomElement from './src/custom-element.js';
+window.CustomElement = CustomElement;
 
 class CustomCheckbox extends CustomElement {
   static observedAttributes = ['label', 'data'];
