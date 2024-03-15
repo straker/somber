@@ -34,6 +34,7 @@ function setAttribute(node, name, value, falsey) {
   value = falsey ? !value : value;
 
   // set component props
+  // TODO: tests (in both bind and custom-element)
   if (
     customElements
       .get(node.nodeName.toLowerCase())

@@ -1,4 +1,5 @@
 import { setupFixture } from '../testutils.js';
+import { on } from '../../src/events.js';
 
 describe('model directive', () => {
   it('removes the binding attribute', () => {
@@ -53,6 +54,24 @@ describe('model directive', () => {
       target.dispatchEvent(new Event('input'));
       assert.equal(host.state.value, 'hello');
     });
+
+    it('emits when value changes', done => {
+      const scope = {
+        state: {
+          value: ''
+        }
+      };
+      const { target, host } = setupFixture(
+        `<input id="target" :model="state.value"/>`,
+        scope
+      );
+      on(scope.state, 'value', () => {
+        done();
+      });
+      target.value = 'hello';
+      target.dispatchEvent(new Event('input'));
+      done(new Error('emit not called'));
+    });
   });
 
   describe('textarea', () => {
@@ -99,6 +118,24 @@ describe('model directive', () => {
       target.value = 'hello';
       target.dispatchEvent(new Event('input'));
       assert.equal(host.state.value, 'hello');
+    });
+
+    it('emits when value changes', done => {
+      const scope = {
+        state: {
+          value: ''
+        }
+      };
+      const { target, host } = setupFixture(
+        `<textarea id="target" :model="state.value"></textarea>`,
+        scope
+      );
+      on(scope.state, 'value', () => {
+        done();
+      });
+      target.value = 'hello';
+      target.dispatchEvent(new Event('input'));
+      done(new Error('emit not called'));
     });
   });
 
@@ -147,6 +184,24 @@ describe('model directive', () => {
       target.dispatchEvent(new Event('change'));
       assert.equal(host.state.value, true);
     });
+
+    it('emits when value changes', done => {
+      const scope = {
+        state: {
+          value: ''
+        }
+      };
+      const { target, host } = setupFixture(
+        `<input type="checkbox" id="target" :model="state.value"/>`,
+        scope
+      );
+      on(scope.state, 'value', () => {
+        done();
+      });
+      target.checked = true;
+      target.dispatchEvent(new Event('change'));
+      done(new Error('emit not called'));
+    });
   });
 
   describe('input[type="radio"]', () => {
@@ -193,6 +248,24 @@ describe('model directive', () => {
       target.checked = true;
       target.dispatchEvent(new Event('change'));
       assert.equal(host.state.value, true);
+    });
+
+    it('emits when value changes', done => {
+      const scope = {
+        state: {
+          value: ''
+        }
+      };
+      const { target, host } = setupFixture(
+        `<input type="radio" id="target" :model="state.value"/>`,
+        scope
+      );
+      on(scope.state, 'value', () => {
+        done();
+      });
+      target.checked = true;
+      target.dispatchEvent(new Event('change'));
+      done(new Error('emit not called'));
     });
   });
 
@@ -275,6 +348,29 @@ describe('model directive', () => {
       target.value = 'two';
       target.dispatchEvent(new Event('change'));
       assert.equal(host.state.value, 'two');
+    });
+
+    it('emits when value changes', done => {
+      const scope = {
+        state: {
+          value: ''
+        }
+      };
+      const { target, host } = setupFixture(
+        `
+        <select id="target" :model="state.value"/>
+          <option>one</option>
+          <option>two</option>
+        </select>
+      `,
+        scope
+      );
+      on(scope.state, 'value', () => {
+        done();
+      });
+      target.value = 'two';
+      target.dispatchEvent(new Event('change'));
+      done(new Error('emit not called'));
     });
   });
 });
