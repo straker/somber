@@ -10,7 +10,7 @@ describe('model directive', () => {
   });
 
   describe('input[type="text"]', () => {
-    it('set the value to empty string if model is null', () => {
+    it('sets the value to empty string if model is null', () => {
       const { target } = setupFixture(
         `<input id="target" :model="state.value"/>`,
         {
@@ -22,7 +22,7 @@ describe('model directive', () => {
       assert.equal(target.value, '');
     });
 
-    it('set the value to empty string if model is undefined', () => {
+    it('sets the value to empty string if model is undefined', () => {
       const { target } = setupFixture(
         `<input id="target" :model="state.value"/>`,
         {
@@ -75,7 +75,7 @@ describe('model directive', () => {
   });
 
   describe('textarea', () => {
-    it('set the value to empty string if model is null', () => {
+    it('sets the value to empty string if model is null', () => {
       const { target } = setupFixture(
         `<textarea id="target" :model="state.value"></textarea>`,
         {
@@ -87,7 +87,7 @@ describe('model directive', () => {
       assert.equal(target.value, '');
     });
 
-    it('set the value to empty string if model is undefined', () => {
+    it('sets the value to empty string if model is undefined', () => {
       const { target } = setupFixture(
         `<textarea id="target" :model="state.value"></textarea>`,
         {
@@ -270,7 +270,7 @@ describe('model directive', () => {
   });
 
   describe('select', () => {
-    it('set the value to first option if model is null', () => {
+    it('sets the value to first option if model is null', () => {
       const { target } = setupFixture(
         `
         <select id="target" :model="state.value"/>
@@ -287,7 +287,7 @@ describe('model directive', () => {
       assert.equal(target.value, 'one');
     });
 
-    it('set the value to first option if model is undefined', () => {
+    it('sets the value to first option if model is undefined', () => {
       const { target } = setupFixture(
         `
         <select id="target" :model="state.value"/>

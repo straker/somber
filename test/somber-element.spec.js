@@ -1,9 +1,9 @@
-import CustomElement from '../src/custom-element.js';
+import SomberElement from '../src/somber-element.js';
 import { getFixture, setupFixture } from './testutils.js';
 import { _callbacks } from '../src/events.js';
 
-describe('CustomElement', () => {
-  class CustomComponent extends CustomElement {
+describe('SomberElement', () => {
+  class CustomComponent extends SomberElement {
     static observedAttributes = ['value'];
   }
   customElements.define('custom-component', CustomComponent);

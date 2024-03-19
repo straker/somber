@@ -63,6 +63,15 @@ describe('watcher', () => {
       proxy.foo = 'hello';
       done(new Error('emit not called'));
     });
+
+    it('returns itself if already watched object', () => {
+      const obj = {
+        foo: 'bar'
+      };
+      const proxy = watchObject(obj);
+      const proxy2 = watchObject(proxy);
+      assert.equal(proxy, proxy2);
+    });
   });
 
   describe('startWatchingPaths', () => {

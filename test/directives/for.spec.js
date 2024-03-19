@@ -1,4 +1,5 @@
 import { setupFixture } from '../testutils.js';
+import walk from '../../src/walk.js';
 
 describe('for directive', () => {
   it('removes the binding attribute', () => {
@@ -11,6 +12,26 @@ describe('for directive', () => {
       }
     );
     assert.isFalse(target.hasAttribute(':for'));
+  });
+
+  it('throws error if binding is invalid', () => {
+    // can't use setupFixture since handling errors in the
+    // connectedCallback of a custom element isn't catchable
+    // before the test fails (can't use assert.throw or
+    // try / catch)
+    const div = document.createElement('div');
+    div.innerHTML = '<div id="target" :for="state.array">hello</div>';
+    assert.throws(() => {
+      walk(
+        div,
+        {
+          state: {
+            array: []
+          }
+        },
+        div
+      );
+    });
   });
 
   describe('array', () => {
@@ -390,6 +411,51 @@ describe('for directive', () => {
           node => node.nodeName.toLowerCase() === 'span'
         )
       );
+    });
+
+    it('removes child nodes', () => {
+      const { target, host } = setupFixture(
+        `<div id="target" :for="item in state.array">
+          <span></span>
+        </div>`,
+        {
+          state: {
+            array: [1, 2, 3, 4]
+          }
+        }
+      );
+      host.state.array.length = 2;
+      assert.equal(target.children.length, 2);
+    });
+
+    it('removes child nodes with :key', () => {
+      const { target, host } = setupFixture(
+        `<div id="target" :for="item in state.array" :key="item">
+          <span></span>
+        </div>`,
+        {
+          state: {
+            array: [1, 2, 3, 4]
+          }
+        }
+      );
+      host.state.array.length = 2;
+      assert.equal(target.children.length, 2);
+    });
+
+    it('handles sparse arrays', () => {
+      const { target, host } = setupFixture(
+        `<div id="target" :for="item in state.array" :key="item">
+          <span></span>
+        </div>`,
+        {
+          state: {
+            array: [1, 2, 3, 4]
+          }
+        }
+      );
+      host.state.array[6] = 7;
+      assert.equal(target.children.length, 5);
     });
 
     it('updates all children without :key', () => {

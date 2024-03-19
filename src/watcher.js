@@ -1,10 +1,5 @@
 import { emit } from './events.js';
 
-// allow proxy object to output to string rather than error
-Proxy.constructor.toString = () => {
-  return '[object Object]';
-};
-
 let watching = false;
 let next;
 export const accessedPaths = [];

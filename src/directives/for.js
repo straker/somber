@@ -59,22 +59,34 @@ export default function forDirective(
         return directiveNode.append(...children);
       }
 
-      children.map((child, index) => {
-        const currChild = directiveNode.children[index];
+      // children is an HTMLCollection so we need to clone it
+      // into an array to prevent it from live updating when
+      // we add or remove children
+      const currChildren = [...directiveNode.children];
+      const length = Math.max(children.length, currChildren.length);
 
+      for (let i = 0; i < length; i++) {
+        const child = children[i];
+        const currChild = currChildren[i];
+
+        // sparse array with empty spot
+        if (!child && !currChild) {
+          continue;
+        }
         // new item
-        if (!currChild) {
-          return directiveNode.appendChild(child);
+        else if (child && !currChild) {
+          directiveNode.appendChild(child);
         }
-
-        // same item
-        if (currChild.__k == child.__k) {
-          return;
+        // removed item
+        else if (currChild && !child) {
+          currChild.remove();
         }
-
         // changed item
-        currChild.replaceWith(child);
-      });
+        else if (currChild.__k != child.__k) {
+          currChild.replaceWith(child);
+        }
+        // same item (do nothing)
+      }
     });
   });
 

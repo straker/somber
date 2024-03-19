@@ -4,7 +4,7 @@ import { on, off } from './events.js';
 
 const template = document.createElement('template');
 
-export default class CustomElement extends HTMLElement {
+export default class SomberElement extends HTMLElement {
   #cbs = [];
 
   constructor() {

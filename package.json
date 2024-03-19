@@ -1,26 +1,55 @@
 {
-  "name": "vue-lite",
+  "name": "somber",
   "version": "1.0.0",
-  "description": "A 4kb subset of Vue",
-  "main": "vue-lite.js",
+  "description": "A 4kb reactive component framework based on Vue.js",
+  "main": "somber.js",
+  "module": "somber.mjs",
+  "sideEffects": false,
+  "files": [
+    "somber.js",
+    "somber.mjs",
+    "somber.min.js",
+    "somber.min.mjs",
+    "somber.d.ts"
+  ],
   "scripts": {
+    "start": "http-server --silent",
     "test": "karma start --single-run",
     "test:watch": "karma start",
     "test:debug": "karma start --browsers Chrome",
     "eslint": "eslint ./{src,test}/",
     "prettier": "prettier --write ./{src,test}/"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/straker/somber.git"
+  },
+  "keywords": [
+    "javascript",
+    "framework",
+    "gamedev",
+    "js13k",
+    "js13kgames",
+    "somber"
+  ],
   "author": "Steven Lambert",
   "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/straker/somber/issues"
+  },
+  "homepage": "https://github.com/straker/somber#readme",
   "devDependencies": {
     "chai": "^4.4.1",
+    "esbuild": "^0.20.2",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-mocha-no-only": "^1.1.1",
+    "http-server": "^14.1.1",
     "husky": "^9.0.11",
     "karma": "^6.4.2",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^3.2.0",
+    "karma-coverage": "^2.2.1",
     "karma-mocha": "^2.0.1",
     "karma-mocha-reporter": "^2.2.5",
     "karma-sinon": "^1.0.5",

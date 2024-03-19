@@ -1,4 +1,4 @@
-import CustomElement from '../src/custom-element.js';
+import SomberElement from '../src/somber-element.js';
 
 let fixture, html;
 
@@ -7,7 +7,7 @@ before(() => {
   fixture.setAttribute('id', 'fixture');
   document.body.appendChild(fixture);
 
-  class TestComponent extends CustomElement {
+  class TestComponent extends SomberElement {
     render() {
       return this.html(html);
     }

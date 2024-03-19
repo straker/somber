@@ -1,4 +1,4 @@
-import CustomElement from '../../src/custom-element.js';
+import SomberElement from '../../src/somber-element.js';
 import { setupFixture } from '../testutils.js';
 
 describe('bind directive', () => {
@@ -643,7 +643,7 @@ describe('bind directive', () => {
   });
 
   describe('prop binding', () => {
-    class PropComponent extends CustomElement {}
+    class PropComponent extends SomberElement {}
     customElements.define('prop-component', PropComponent);
 
     beforeEach(() => {

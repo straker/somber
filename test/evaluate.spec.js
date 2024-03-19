@@ -31,5 +31,19 @@ describe('evaluate', () => {
     assert.doesNotThrow(() => {
       evaluate({ state: 'foo' }, 'foo');
     });
+    assert.isTrue(
+      warnStub.calledWith(
+        sinon.match('Error when evaluating expression')
+      )
+    );
+  });
+
+  it('does not throw if expression is invalid', () => {
+    assert.doesNotThrow(() => {
+      evaluate({ state: 'foo' }, 'foo\bar');
+    });
+    assert.isTrue(
+      errorStub.calledWith(sinon.match('Invalid or unexpected token'))
+    );
   });
 });

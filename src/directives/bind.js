@@ -1,4 +1,4 @@
-import CustomElement from '../custom-element.js';
+import SomberElement from '../somber-element.js';
 import evaluate from '../evaluate.js';
 import {
   accessedPaths,
@@ -40,7 +40,7 @@ function setAttribute(node, name, value, falsey) {
   const element = customElements.get(node.nodeName.toLowerCase());
   if (
     element &&
-    element.prototype instanceof CustomElement &&
+    element.prototype instanceof SomberElement &&
     element.observedAttributes?.includes(name)
   ) {
     Object.defineProperty(node, name, {

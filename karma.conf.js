@@ -6,11 +6,31 @@ module.exports = function (config) {
     frameworks: ['mocha', 'chai', 'sinon'],
     files: [
       { pattern: 'src/**/*.js', type: 'module', included: false },
-      { pattern: 'test/testutils.js', type: 'module', included: false },
-      { pattern: 'test/**/*.spec.js', type: 'module' },
+      {
+        pattern: 'test/testutils.js',
+        type: 'module',
+        included: false
+      },
+      { pattern: 'test/**/*.spec.js', type: 'module' }
     ],
     browsers: ['ChromeHeadless'],
-    reporters: ['mocha'],
+    reporters: ['mocha', 'coverage'],
+    preprocessors: {
+      'src/**/*.js': ['coverage']
+    },
+    coverageReporter: {
+      check: {
+        emitWarning: false,
+        global: {
+          statements: 95,
+          branches: 95,
+          functions: 95,
+          lines: 95
+        }
+      },
+      type: 'html',
+      dir: 'coverage/'
+    },
     client: {
       mocha: {
         timeout: 4000,
