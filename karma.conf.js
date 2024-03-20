@@ -28,8 +28,10 @@ module.exports = function (config) {
           lines: 95
         }
       },
-      type: 'html',
-      dir: 'coverage/'
+      reporters: [
+        { type: 'html', dir: 'coverage/' },
+        { type: 'text-summary' }
+      ]
     },
     client: {
       mocha: {

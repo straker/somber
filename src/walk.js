@@ -1,6 +1,7 @@
 import bindDirective from './directives/bind.js';
 import eventDirective from './directives/event.js';
 import forDirective from './directives/for.js';
+import htmlDirective from './directives/html.js';
 import ifDirective from './directives/if.js';
 import modelDirective from './directives/model.js';
 import textDirective from './directives/text.js';
@@ -10,6 +11,7 @@ export const _directives = {
   bind: bindDirective,
   event: eventDirective,
   for: forDirective,
+  html: htmlDirective,
   if: ifDirective,
   model: modelDirective,
   text: textDirective
@@ -51,12 +53,18 @@ export default function walk(reactiveNode, scope, rootNode) {
         break;
       }
       case 3: // Node.TEXT_NODE
+        const { nodeValue } = node;
         // only perform logic on bound values
-        if (!node.nodeValue.includes('{{')) {
+        if (!nodeValue.includes('{{')) {
           continue;
         }
 
-        _directives.text(reactiveNode, scope, node, node.nodeValue);
+        _directives[nodeValue.includes('{{{') ? 'html' : 'text'](
+          reactiveNode,
+          scope,
+          node,
+          nodeValue
+        );
     }
   }
 }

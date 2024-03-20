@@ -294,6 +294,22 @@ describe('bind directive', () => {
         assert.isTrue(target.classList.contains('exists'));
         assert.isTrue(target.classList.contains('hello'));
       });
+
+      it('allows dynamic class names', () => {
+        const { target } = setupFixture(
+          `<div
+            id="target"
+            :class="{ hello: 'foo', [state.name]: true }"
+          >hello</div>`,
+          {
+            state: {
+              name: 'world'
+            }
+          }
+        );
+        assert.isTrue(target.classList.contains('hello'));
+        assert.isTrue(target.classList.contains('world'));
+      });
     });
 
     describe('removes the class', () => {

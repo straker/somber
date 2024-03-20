@@ -180,11 +180,29 @@ describe('walk', () => {
     );
   });
 
+  it('calls html directive', () => {
+    const spy = sinon.spy(_directives, 'html');
+    fixture.innerHTML = '<div id="target">{{{ state.foo }}}</div>';
+    const scope = { state: { foo: 'bar' } };
+    const target = fixture.querySelector('#target');
+    walk(fixture, scope, fixture);
+    assert.isTrue(
+      spy.calledWith(
+        fixture,
+        scope,
+        target.firstChild,
+        '{{{ state.foo }}}'
+      )
+    );
+  });
+
   it('ignores non-bound text', () => {
-    const spy = sinon.spy(_directives, 'text');
+    const textSpy = sinon.spy(_directives, 'text');
+    const htmlSpy = sinon.spy(_directives, 'html');
     fixture.innerHTML = '<div id="target">state.foo</div>';
     walk(fixture, { state: { foo: 'bar' } }, fixture);
-    assert.isFalse(spy.called);
+    assert.isFalse(textSpy.called);
+    assert.isFalse(htmlSpy.called);
   });
 
   it('walks nested children', () => {
