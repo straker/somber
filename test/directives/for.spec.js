@@ -102,6 +102,22 @@ describe('for directive', () => {
       }
     });
 
+    it('defaults index to $index', () => {
+      const { target } = setupFixture(
+        `<div id="target" :for="item in state.array">
+          <span>{{ $index }}.{{ item }}</span>
+        </div>`,
+        {
+          state: {
+            array: [1, 2, 3, 4]
+          }
+        }
+      );
+      for (let i = 0; i < 4; i++) {
+        assert.equal(target.children[i].textContent, `${i}.${i + 1}`);
+      }
+    });
+
     it('processes the value and index as any name', () => {
       const { target } = setupFixture(
         `<div id="target" :for="(foobar, baz) in state.array">

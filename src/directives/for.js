@@ -135,7 +135,7 @@ function createChildren(
         get [value]() {
           return iterable[index];
         },
-        [key]: index
+        [key ?? '$index']: index
       });
       return createChild(
         reactiveNode,
