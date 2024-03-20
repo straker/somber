@@ -28,7 +28,7 @@ const handler = {
 
   set(obj, key, value) {
     let newValue;
-    if (isObject(value)) {
+    if (isObject(value) && !isProxied(value)) {
       newValue = Reflect.set(obj, key, proxyObject(value));
 
       // keep track of the parent object so we can emit up the

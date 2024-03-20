@@ -72,6 +72,20 @@ describe('watcher', () => {
       const proxy2 = watchObject(proxy);
       assert.equal(proxy, proxy2);
     });
+
+    it('does not try to proxy a proxy object when setting', () => {
+      const obj = {
+        foo: 'bar'
+      };
+      const obj2 = {
+        hello: 'world'
+      };
+      const proxy = watchObject(obj);
+      const proxy2 = watchObject(obj2);
+      assert.doesNotThrow(() => {
+        proxy.thing = obj2;
+      });
+    });
   });
 
   describe('startWatchingPaths', () => {
