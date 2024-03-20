@@ -61,11 +61,13 @@ function setAttribute(node, name, value, falsey) {
   // class attribute will be set with an object
   if (name == 'class') {
     return Object.entries(value).map(([propName, condition]) => {
+      propName = propName.trim().split(/\s+/g);
+
       if (!condition) {
-        return node.classList.remove(propName);
+        return node.classList.remove(...propName);
       }
 
-      node.classList.add(propName);
+      node.classList.add(...propName);
     });
   }
 

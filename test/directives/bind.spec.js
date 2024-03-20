@@ -310,6 +310,21 @@ describe('bind directive', () => {
         assert.isTrue(target.classList.contains('hello'));
         assert.isTrue(target.classList.contains('world'));
       });
+
+      it('allows white space in name', () => {
+        const { target } = setupFixture(
+          `<div id="target" :class="{ 'hello world': true }">hello</div>`
+        );
+        assert.isTrue(target.classList.contains('hello'));
+        assert.isTrue(target.classList.contains('world'));
+      });
+
+      it('is white space insensitive', () => {
+        const { target } = setupFixture(
+          `<div id="target" :class="{ '   hello   ': true }">hello</div>`
+        );
+        assert.isTrue(target.classList.contains('hello'));
+      });
     });
 
     describe('removes the class', () => {
