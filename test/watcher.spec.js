@@ -1,5 +1,5 @@
 import {
-  watchObject,
+  watch,
   accessedPaths,
   startWatchingPaths,
   stopWatchingPaths
@@ -7,10 +7,10 @@ import {
 import { on } from '../src/events.js';
 
 describe('watcher', () => {
-  describe('watchObject', () => {
+  describe('watch', () => {
     it('wraps the object in a proxy', () => {
       const obj = {};
-      const proxy = watchObject(obj);
+      const proxy = watch(obj);
       assert.notEqual(obj, proxy);
       assert.isTrue('__p' in proxy);
     });
@@ -19,7 +19,7 @@ describe('watcher', () => {
       const obj = {
         foo: 'bar'
       };
-      const proxy = watchObject(obj);
+      const proxy = watch(obj);
       assert.equal(proxy.foo, 'bar');
     });
 
@@ -27,7 +27,7 @@ describe('watcher', () => {
       const obj = {
         foo: 'bar'
       };
-      const proxy = watchObject(obj);
+      const proxy = watch(obj);
       proxy.foo = 'hello';
       assert.equal(proxy.foo, 'hello');
     });
@@ -40,14 +40,14 @@ describe('watcher', () => {
           }
         }
       };
-      const proxy = watchObject(obj);
+      const proxy = watch(obj);
       assert.isTrue('__p' in proxy.foo);
       assert.isTrue('__p' in proxy.foo.bar);
     });
 
     it('watches nested objects when set', () => {
       const obj = {};
-      const proxy = watchObject(obj);
+      const proxy = watch(obj);
       proxy.foo = { hello: 'world' };
       assert.isTrue('__p' in proxy.foo);
     });
@@ -56,7 +56,7 @@ describe('watcher', () => {
       const obj = {
         foo: 'bar'
       };
-      const proxy = watchObject(obj);
+      const proxy = watch(obj);
       on(obj, 'foo', () => {
         done();
       });
@@ -68,8 +68,8 @@ describe('watcher', () => {
       const obj = {
         foo: 'bar'
       };
-      const proxy = watchObject(obj);
-      const proxy2 = watchObject(proxy);
+      const proxy = watch(obj);
+      const proxy2 = watch(proxy);
       assert.equal(proxy, proxy2);
     });
 
@@ -80,8 +80,8 @@ describe('watcher', () => {
       const obj2 = {
         hello: 'world'
       };
-      const proxy = watchObject(obj);
-      const proxy2 = watchObject(obj2);
+      const proxy = watch(obj);
+      const proxy2 = watch(obj2);
       assert.doesNotThrow(() => {
         proxy.thing = obj2;
       });
@@ -97,7 +97,7 @@ describe('watcher', () => {
       const obj = {
         foo: 'bar'
       };
-      const proxy = watchObject(obj);
+      const proxy = watch(obj);
       proxy.foo;
       assert.lengthOf(accessedPaths, 0);
       startWatchingPaths();
@@ -113,7 +113,7 @@ describe('watcher', () => {
         foo: 'bar',
         hello: 'world'
       };
-      const proxy = watchObject(obj);
+      const proxy = watch(obj);
       startWatchingPaths();
       proxy.foo;
       proxy.hello;
@@ -134,7 +134,7 @@ describe('watcher', () => {
           }
         }
       };
-      const proxy = watchObject(obj);
+      const proxy = watch(obj);
       startWatchingPaths();
       proxy.thing;
       proxy.foo;
@@ -154,7 +154,7 @@ describe('watcher', () => {
       const obj = {
         foo: 'bar'
       };
-      const proxy = watchObject(obj);
+      const proxy = watch(obj);
       startWatchingPaths();
       proxy.foo;
       stopWatchingPaths();
@@ -172,7 +172,7 @@ describe('watcher', () => {
       const obj = {
         foo: 'bar'
       };
-      const proxy = watchObject(obj);
+      const proxy = watch(obj);
       proxy.foo;
       assert.lengthOf(accessedPaths, 0);
       startWatchingPaths();

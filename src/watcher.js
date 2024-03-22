@@ -48,7 +48,7 @@ const handler = {
   }
 };
 
-export function watchObject(obj) {
+export function watch(obj) {
   if (isProxied(obj)) {
     return obj;
   }

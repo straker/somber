@@ -21,7 +21,7 @@ afterEach(() => {
   html = '';
 });
 
-export function setupFixture(str, props = {}) {
+export function setupFixture(str, props = {}, alert = true) {
   html = str;
   const host = document.createElement('test-component');
   Object.entries(props).forEach(([name, value]) => {
@@ -29,7 +29,11 @@ export function setupFixture(str, props = {}) {
   });
   fixture.appendChild(host);
   const target = document.querySelector('#target');
-  assert(target, 'target not found');
+
+  if (alert) {
+    assert(target, 'target not found');
+  }
+
   return { host, target };
 }
 

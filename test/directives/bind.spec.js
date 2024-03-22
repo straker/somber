@@ -165,11 +165,10 @@ describe('bind directive', () => {
     it('when :key is used with :for', () => {
       const { target } = setupFixture(
         `<div id="target" :key="1" :for="item in state.items">
-          <span></span>
         </div>`,
         {
           state: {
-            items: []
+            items: [1]
           }
         }
       );

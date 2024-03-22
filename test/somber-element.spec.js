@@ -40,7 +40,7 @@ describe('SomberElement', () => {
       const state = host.state;
       host.render = sinon
         .stub()
-        .callsFake(() => document.createElement('div'));
+        .callsFake(() => [document.createElement('div')]);
       fixture.appendChild(host);
       assert.isTrue(host.render.called);
     });
@@ -74,11 +74,12 @@ describe('SomberElement', () => {
   });
 
   describe('html', () => {
-    it('returns the string as DOM', () => {
+    it('returns the string as DOM array', () => {
       const host = document.createElement('custom-component');
       const dom = host.html('<div id="one"></div>');
-      assert.isTrue(dom instanceof HTMLElement);
-      assert.equal(dom.nodeName, 'DIV');
+      assert.equal(dom.length, 1);
+      assert.isTrue(dom[0] instanceof HTMLElement);
+      assert.equal(dom[0].nodeName, 'DIV');
     });
 
     it('walks the DOM and applies bindings', () => {
@@ -90,7 +91,7 @@ describe('SomberElement', () => {
             <div>{{ state.value }}
           <div>
         </div>
-      `);
+      `)[1]; // due to whitespace first node is text
       assert.equal(dom.getAttribute('foo'), '1');
       assert.equal(dom.textContent.trim(), '1');
     });
@@ -106,8 +107,8 @@ describe('SomberElement', () => {
           }
         }
       );
-      target.appendChild(
-        target.html(`
+      target.append(
+        ...target.html(`
         <div :aria-label="value">
           <span>{{ value }}</span>
         </div>
@@ -129,8 +130,8 @@ describe('SomberElement', () => {
           }
         }
       );
-      target.appendChild(
-        target.html(`
+      target.append(
+        ...target.html(`
         <div :aria-label="value">
           <span>{{ value }}</span>
         </div>
@@ -148,8 +149,8 @@ describe('SomberElement', () => {
       const { target } = setupFixture(
         `<custom-component id="target" :value="{ foo: { bar: { baz: 'hello' }}}">`
       );
-      target.appendChild(
-        target.html(`
+      target.append(
+        ...target.html(`
         <div :aria-label="value.foo.bar.baz">
           <span>{{ value.foo.bar.baz }}</span>
         </div>
@@ -175,8 +176,8 @@ describe('SomberElement', () => {
           }
         }
       );
-      target.appendChild(
-        target.html(`
+      target.append(
+        ...target.html(`
         <div :aria-label="value.foo.bar.baz">
           <span>{{ value.foo.bar.baz }}</span>
         </div>
@@ -202,8 +203,8 @@ describe('SomberElement', () => {
           }
         }
       );
-      target.appendChild(
-        target.html(`
+      target.append(
+        ...target.html(`
         <div :aria-label="value.foo.bar.baz">
           <span>{{ value.foo.bar.baz }}</span>
         </div>

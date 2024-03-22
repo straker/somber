@@ -48,7 +48,7 @@ export default function walk(reactiveNode, scope, rootNode) {
             type == '@'
               ? _directives.event
               : _directives[name] ?? _directives.bind;
-          directive(reactiveNode, scope, node, name, value);
+          directive(reactiveNode, scope, node, name, value.trim());
         }
         break;
       }
@@ -63,7 +63,7 @@ export default function walk(reactiveNode, scope, rootNode) {
           reactiveNode,
           scope,
           node,
-          nodeValue
+          nodeValue.trim()
         );
     }
   }

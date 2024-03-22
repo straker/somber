@@ -12,7 +12,7 @@ export default function htmlDirective(
   nodeValue
 ) {
   directiveNode = directiveNode.parentElement;
-  const exp = nodeValue.trim().slice(3, -3).trim();
+  const exp = nodeValue.slice(3, -3).trim();
 
   startWatchingPaths();
   const value = evaluate(scope, exp);

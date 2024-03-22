@@ -1,4 +1,4 @@
-import { watchObject } from './watcher.js';
+import { watch } from './watcher.js';
 import walk from './walk.js';
 import { on, off } from './events.js';
 
@@ -13,10 +13,10 @@ export default class SomberElement extends HTMLElement {
   }
 
   connectedCallback() {
-    this.state = watchObject(this.state);
+    this.state = watch(this.state);
 
     if (this.render) {
-      this.appendChild(this.render());
+      this.append(...this.render());
     }
   }
 
@@ -33,6 +33,6 @@ export default class SomberElement extends HTMLElement {
     template.innerHTML = str;
     walk(this, this, template.content.firstElementChild);
 
-    return template.content.firstElementChild;
+    return template.content.childNodes;
   }
 }
