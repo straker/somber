@@ -45,7 +45,7 @@ describe('for directive', () => {
           }
         }
       );
-      assert.equal(host.children.length, 4);
+      assert.lengthOf(host.children, 4);
       assert.isTrue(
         Array.from(host.children).every(
           node => node.nodeName.toLowerCase() === 'div'
@@ -190,6 +190,27 @@ describe('for directive', () => {
         )
       );
     });
+
+    it('works with template element', () => {
+      const { host } = setupFixture(
+        `<template :for="(item, index) in state.array">
+          <span>{{ index }}</span><span>{{ item }}</span>
+        </template>`,
+        {
+          state: {
+            count: 10,
+            array: [1, 2, 3, 4]
+          }
+        },
+        false
+      );
+      assert.lengthOf(host.children, 8);
+      for (let i = 0; i < 4; i++) {
+        let j = i * 2;
+        assert.equal(host.children[j].textContent, i);
+        assert.equal(host.children[j + 1].textContent, i + 1);
+      }
+    });
   });
 
   describe('object', () => {
@@ -209,7 +230,7 @@ describe('for directive', () => {
         }
       );
 
-      assert.equal(host.children.length, 4);
+      assert.lengthOf(host.children, 4);
       assert.isTrue(
         Array.from(host.children).every(
           node => node.nodeName.toLowerCase() === 'div'
@@ -389,6 +410,33 @@ describe('for directive', () => {
         )
       );
     });
+
+    it('works with template element', () => {
+      const { host } = setupFixture(
+        `<template :for="(value, key, index) in state.obj">
+          <span>{{ key }}</span><span>{{ value }}</span>
+        </template>`,
+        {
+          state: {
+            count: 10,
+            obj: {
+              first_name: 'John',
+              last_name: 'Doe',
+              age: 'unknown',
+              height: '5.9'
+            }
+          }
+        },
+        false
+      );
+      assert.lengthOf(host.children, 8);
+      const entries = Object.entries(host.state.obj);
+      for (let i = 0; i < 4; i++) {
+        const j = i * 2;
+        assert.equal(host.children[j].textContent, entries[i][0]);
+        assert.equal(host.children[j + 1].textContent, entries[i][1]);
+      }
+    });
   });
 
   describe('when the binding changes', () => {
@@ -403,7 +451,7 @@ describe('for directive', () => {
         }
       );
       host.state.array.push(5);
-      assert.equal(host.children.length, 5);
+      assert.lengthOf(host.children, 5);
       assert.isTrue(
         Array.from(host.children).every(
           node => node.nodeName.toLowerCase() === 'div'
@@ -422,7 +470,7 @@ describe('for directive', () => {
         }
       );
       host.state.array.length = 2;
-      assert.equal(host.children.length, 2);
+      assert.lengthOf(host.children, 2);
     });
 
     it('removes child nodes with :key', () => {
@@ -436,7 +484,7 @@ describe('for directive', () => {
         }
       );
       host.state.array.length = 2;
-      assert.equal(host.children.length, 2);
+      assert.lengthOf(host.children, 2);
     });
 
     it('handles sparse arrays', () => {
@@ -450,7 +498,7 @@ describe('for directive', () => {
         }
       );
       host.state.array[6] = 7;
-      assert.equal(host.children.length, 5);
+      assert.lengthOf(host.children, 5);
     });
 
     it('updates all children without :key', () => {

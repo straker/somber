@@ -37,7 +37,7 @@ export default function forDirective(
   directiveNode.removeAttribute(':key');
 
   markNode(directiveNode); // save spot in DOM
-  // directiveNode.remove();  // start with a clean slate
+  directiveNode.remove(); // start with a clean slate
 
   startWatchingPaths();
   const iterable = evaluate(scope, iterator);
@@ -142,37 +142,51 @@ function createItems(
   forKey
 ) {
   if (Array.isArray(iterable)) {
-    return iterable.map((item, index) => {
-      const ctx = watch({
-        ...scope,
-        // use a getter so when the state is updated the scope
-        // value reflects the current state of the iterable
-        get [value]() {
-          return iterable[index];
-        },
-        [key ?? '$index']: index
-      });
-      return createItem(reactiveNode, ctx, directiveNode, forKey);
-    });
+    return iterable
+      .map((item, index) => {
+        const ctx = watch({
+          ...scope,
+          // use a getter so when the state is updated the scope
+          // value reflects the current state of the iterable
+          get [value]() {
+            return iterable[index];
+          },
+          [key ?? '$index']: index
+        });
+        return createItem(reactiveNode, ctx, directiveNode, forKey);
+      })
+      .flat();
   }
 
-  return Object.keys(iterable).map((objKey, objIndex) => {
-    const ctx = {
-      ...scope,
-      get [value]() {
-        return iterable[objKey];
-      },
-      [key]: objKey,
-      [index]: objIndex
-    };
-    return createItem(reactiveNode, ctx, directiveNode, forKey);
-  });
+  return Object.keys(iterable)
+    .map((objKey, objIndex) => {
+      const ctx = {
+        ...scope,
+        get [value]() {
+          return iterable[objKey];
+        },
+        [key]: objKey,
+        [index]: objIndex
+      };
+      return createItem(reactiveNode, ctx, directiveNode, forKey);
+    })
+    .flat();
 }
 
 function createItem(reactiveNode, scope, directiveNode, forKey) {
-  const item = directiveNode.cloneNode(true);
-  // __k = key
-  item.__k = evaluate(scope, forKey);
+  let item = directiveNode.cloneNode(true);
+  // handle :for attribute on template nodes
+  item = item.content ? item.content : item;
+
   walk(reactiveNode, scope, item);
-  return item;
+
+  // handle document fragment from template nodes
+  item =
+    item instanceof DocumentFragment
+      ? Array.from(item.childNodes)
+      : [item];
+  return item.map(i => {
+    i.__k = evaluate(scope, forKey);
+    return i;
+  });
 }
