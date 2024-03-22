@@ -4,6 +4,7 @@ import forDirective from './directives/for.js';
 import htmlDirective from './directives/html.js';
 import ifDirective from './directives/if.js';
 import modelDirective from './directives/model.js';
+import showDirective from './directives/show.js';
 import textDirective from './directives/text.js';
 
 // export for testing purposes only
@@ -14,6 +15,7 @@ export const _directives = {
   html: htmlDirective,
   if: ifDirective,
   model: modelDirective,
+  show: showDirective,
   text: textDirective
 };
 

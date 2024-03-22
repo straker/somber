@@ -2,7 +2,7 @@ import { watch } from './watcher.js';
 import walk from './walk.js';
 import { on, off } from './events.js';
 
-const template = document.createElement('template');
+const template = document.createElement('div');
 
 export default class SomberElement extends HTMLElement {
   #cbs = [];
@@ -31,8 +31,8 @@ export default class SomberElement extends HTMLElement {
 
   html(str) {
     template.innerHTML = str;
-    walk(this, this, template.content.firstElementChild);
+    walk(this, this, template.firstElementChild);
 
-    return template.content.childNodes;
+    return template.childNodes;
   }
 }

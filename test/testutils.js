@@ -28,7 +28,7 @@ export function setupFixture(str, props = {}, alert = true) {
     host[name] = value;
   });
   fixture.appendChild(host);
-  const target = document.querySelector('#target');
+  const target = host.querySelector('#target');
 
   if (alert) {
     assert(target, 'target not found');

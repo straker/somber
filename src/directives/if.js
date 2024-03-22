@@ -1,9 +1,11 @@
-import bindDirective from './bind.js';
+import evaluate from '../evaluate.js';
+import {
+  accessedPaths,
+  startWatchingPaths,
+  stopWatchingPaths
+} from '../watcher.js';
+import { markNode } from '../utils.js';
 
-/**
- * If directive is just syntactic sugar for setting the `hidden` attribute.
- * Essentially this is just an alias for :show directive
- */
 export default function ifDirective(
   reactiveNode,
   scope,
@@ -11,12 +13,26 @@ export default function ifDirective(
   name,
   exp
 ) {
-  bindDirective(
-    reactiveNode,
-    scope,
-    directiveNode,
-    'hidden',
-    exp,
-    true
-  );
+  markNode(directiveNode);
+
+  startWatchingPaths();
+  const value = evaluate(scope, exp);
+  stopWatchingPaths();
+
+  // html can only bind to a single path
+  accessedPaths.map(({ obj, key }) => {
+    reactiveNode.on(obj, key, () => {
+      if (!evaluate(scope, exp)) {
+        return directiveNode.remove();
+      }
+
+      // use __a.before instead of __b.after to match how :for
+      // uses it and make gzip a little bit better
+      directiveNode.__a.before(directiveNode);
+    });
+  });
+
+  if (!value) {
+    directiveNode.remove();
+  }
 }

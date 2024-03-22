@@ -42,14 +42,14 @@ describe('walk', () => {
     );
   });
 
-  it('calls if directive for :if', () => {
-    const spy = sinon.spy(_directives, 'if');
-    fixture.innerHTML = '<div id="target" :if="state.foo"></div>';
+  it('calls show directive for :show', () => {
+    const spy = sinon.spy(_directives, 'show');
+    fixture.innerHTML = '<div id="target" :show="state.foo"></div>';
     const scope = { state: { foo: 'bar' } };
     const target = fixture.querySelector('#target');
     walk(fixture, scope, fixture);
     assert.isTrue(
-      spy.calledWith(fixture, scope, target, 'if', 'state.foo')
+      spy.calledWith(fixture, scope, target, 'show', 'state.foo')
     );
   });
 
@@ -113,12 +113,13 @@ describe('walk', () => {
 
   it('walks each attribute and calls the appropriate directive', () => {
     const bindSpy = sinon.spy(_directives, 'bind');
+    const showSpy = sinon.spy(_directives, 'show');
     const ifSpy = sinon.spy(_directives, 'if');
     const eventSpy = sinon.spy(_directives, 'event');
     fixture.innerHTML =
-      '<div id="target" :foo="state.foo" :bar="state.bar" :baz="state.baz" :if="state.if" @click="state.click"></div>';
+      '<div id="target" :foo="state.foo" :bar="state.bar" :baz="state.baz" :show="state.show" :if="state.if" @click="state.click"></div>';
     const scope = {
-      state: { foo: 1, bar: 2, baz: 3, if: 4, click: 5 }
+      state: { foo: 1, bar: 2, baz: 3, show: 4, if: 5, click: 6 }
     };
     const target = fixture.querySelector('#target');
     walk(fixture, scope, fixture);
@@ -138,6 +139,11 @@ describe('walk', () => {
       bindSpy
         .getCall(2)
         .calledWith(fixture, scope, target, 'baz', 'state.baz')
+    );
+
+    assert.equal(showSpy.callCount, 1);
+    assert.isTrue(
+      showSpy.calledWith(fixture, scope, target, 'show', 'state.show')
     );
 
     assert.equal(ifSpy.callCount, 1);
