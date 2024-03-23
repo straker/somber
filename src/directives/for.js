@@ -176,17 +176,11 @@ function createItems(
 function createItem(reactiveNode, scope, directiveNode, forKey) {
   let item = directiveNode.cloneNode(true);
   // handle :for attribute on template nodes
-  item = item.content ? item.content : item;
-
-  walk(reactiveNode, scope, item);
-
-  // handle document fragment from template nodes
-  item =
-    item instanceof DocumentFragment
-      ? Array.from(item.childNodes)
-      : [item];
-  return item.map(i => {
-    i.__k = evaluate(scope, forKey);
-    return i;
-  });
+  return (item.content ? [...item.content.childNodes] : [item]).map(
+    item => {
+      walk(reactiveNode, scope, item);
+      item.__k = evaluate(scope, forKey);
+      return item;
+    }
+  );
 }

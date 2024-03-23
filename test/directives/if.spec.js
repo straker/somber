@@ -68,6 +68,16 @@ describe('if directive', () => {
       host.state.value = true;
       assert.exists(host.querySelector('#target'));
     });
+
+    it('when :if is used on template', () => {
+      const { target } = setupFixture(
+        `<template :if="true">
+          <span>Hello</span>
+          <span id="target">World</span>
+        </template>`
+      );
+      assert.isTrue(target.isConnected);
+    });
   });
 
   describe('hides the element', () => {
@@ -154,6 +164,18 @@ describe('if directive', () => {
       );
       assert.isTrue(target.isConnected);
       host.state.value = false;
+      assert.notExists(host.querySelector('#target'));
+    });
+
+    it('when :if is used on template', () => {
+      const { host } = setupFixture(
+        `<template :if="false">
+          <span>Hello</span>
+          <span id="target">World</span>
+        </template>`,
+        {},
+        false
+      );
       assert.notExists(host.querySelector('#target'));
     });
   });

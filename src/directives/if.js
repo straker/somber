@@ -14,6 +14,10 @@ export default function ifDirective(
   exp
 ) {
   markNode(directiveNode);
+  const nodes = directiveNode.content
+    ? [...directiveNode.content.childNodes]
+    : [directiveNode];
+  directiveNode.remove();
 
   startWatchingPaths();
   const value = evaluate(scope, exp);
@@ -23,16 +27,20 @@ export default function ifDirective(
   accessedPaths.map(({ obj, key }) => {
     reactiveNode.on(obj, key, () => {
       if (!evaluate(scope, exp)) {
-        return directiveNode.remove();
+        return nodes.map(node => node.remove());
       }
 
-      // use __a.before instead of __b.after to match how :for
-      // uses it and make gzip a little bit better
-      directiveNode.__a.before(directiveNode);
+      insert(directiveNode, nodes);
     });
   });
 
-  if (!value) {
-    directiveNode.remove();
+  if (value) {
+    insert(directiveNode, nodes);
   }
+}
+
+function insert(directiveNode, nodes) {
+  // use __a.before instead of __b.after to match how :for
+  // uses it and make gzip a little bit better
+  nodes.map(node => directiveNode.__a.before(node));
 }
