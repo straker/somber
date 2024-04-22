@@ -19,6 +19,8 @@ export const _directives = {
   text: textDirective
 };
 
+const walkCache = new WeakMap();
+
 export default function walk(reactiveNode, scope, rootNode) {
   const walker = document.createNodeIterator(
     rootNode,
@@ -26,11 +28,18 @@ export default function walk(reactiveNode, scope, rootNode) {
   );
   let node;
 
+  // node iterator is a live list meaning that any new elements
+  // added to the DOM during traversal will also get processed
   while ((node = walker.nextNode())) {
+    if (walkCache.has(node)) {
+      continue;
+    }
+    walkCache.set(node, 1);
+
     switch (node.nodeType) {
       case 1: {
         // Node.ELEMENT_NODE
-        let hasForBinding = node.hasAttribute(':for');
+        const hasForBinding = node.hasAttribute(':for');
         for (let { name, value } of [...node.attributes]) {
           const type = name[0];
 

@@ -222,4 +222,15 @@ describe('walk', () => {
       spy.calledWith(fixture, scope, target, 'item', 'state.foo')
     );
   });
+
+  it('does not process nodes twice', () => {
+    fixture.innerHTML = '<div id="target" :item="state.foo"></div>';
+    const scope = { state: { foo: 'bar' } };
+    const target = fixture.querySelector('#target');
+    walk(fixture, scope, fixture);
+    const spy = sinon.spy(_directives, 'bind');
+    target.setAttribute(':thing', 'state.foo');
+    walk(fixture, scope, fixture);
+    assert.isFalse(spy.called);
+  });
 });
