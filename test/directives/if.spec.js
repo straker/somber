@@ -68,16 +68,6 @@ describe('if directive', () => {
       host.state.value = true;
       assert.exists(host.querySelector('#target'));
     });
-
-    it('when :if is used on template', () => {
-      const { target } = setupFixture(
-        `<template :if="true">
-          <span>Hello</span>
-          <span id="target">World</span>
-        </template>`
-      );
-      assert.isTrue(target.isConnected);
-    });
   });
 
   describe('hides the element', () => {
@@ -166,18 +156,6 @@ describe('if directive', () => {
       host.state.value = false;
       assert.notExists(host.querySelector('#target'));
     });
-
-    it('when :if is used on template', () => {
-      const { host } = setupFixture(
-        `<template :if="false">
-          <span>Hello</span>
-          <span id="target">World</span>
-        </template>`,
-        {},
-        false
-      );
-      assert.notExists(host.querySelector('#target'));
-    });
   });
 
   describe('when the binding changes', () => {
@@ -223,6 +201,186 @@ describe('if directive', () => {
       assert.isTrue(host.children[1] === host.querySelector('#b'));
       assert.isTrue(host.children[2] === host.querySelector('#c'));
       assert.isTrue(host.children[3] === host.querySelector('#d'));
+    });
+
+    it('works when setting to the same value twice', () => {
+      const { host } = setupFixture(
+        `<div id="target" :if="state.value">hello</div>`,
+        {
+          state: {
+            value: false
+          }
+        },
+        false
+      );
+      host.state.value = true;
+      host.state.value = true;
+      host.state.value = true;
+      host.state.value = true;
+      host.state.value = false;
+      host.state.value = false;
+      host.state.value = true;
+      host.state.value = true;
+      host.state.value = false;
+      host.state.value = false;
+      host.state.value = false;
+      host.state.value = true;
+      assert.exists(host.querySelector('#target'));
+    });
+  });
+
+  describe('nested if', () => {
+    it('processes bindings inside :if', () => {
+      const { target } = setupFixture(
+        `<span :if="true">
+          <span>Hello</span>
+          <span id="target" :foo="state.foo">{{ state.value }}</span>
+        </span>`,
+        {
+          state: {
+            foo: 'bar',
+            value: 'hello'
+          }
+        }
+      );
+      assert.equal(target.getAttribute('foo'), 'bar');
+      assert.equal(target.textContent, 'hello');
+    });
+
+    it('processes bindings inside :if even when not shown at first', () => {
+      const { host } = setupFixture(
+        `<span :if="state.if">
+          <span>Hello</span>
+          <span id="target" :foo="state.foo">{{ state.value }}</span>
+        </span>`,
+        {
+          state: {
+            if: false,
+            foo: 'bar',
+            value: 'hello'
+          }
+        },
+        false
+      );
+      host.state.if = true;
+      const target = host.querySelector('#target');
+      assert.equal(target.getAttribute('foo'), 'bar');
+      assert.equal(target.textContent, 'hello');
+    });
+
+    it('processes nested :if nodes', () => {
+      const { target } = setupFixture(
+        `<span :if="true">
+          <span>Hello</span>
+          <span :if="true">
+            <span id="target" :foo="state.foo">{{ state.value }}</span>
+          </span>
+        </span>`,
+        {
+          state: {
+            foo: 'bar',
+            value: 'hello'
+          }
+        }
+      );
+      assert.equal(target.getAttribute('foo'), 'bar');
+      assert.equal(target.textContent, 'hello');
+    });
+
+    it('processes nested :if nodes when inner is not shown first', () => {
+      const { host } = setupFixture(
+        `<span :if="true">
+          <span>Hello</span>
+          <span :if="state.if">
+            <span id="target" :foo="state.foo">{{ state.value }}</span>
+          </span>
+        </span>`,
+        {
+          state: {
+            if: false,
+            foo: 'bar',
+            value: 'hello'
+          }
+        },
+        false
+      );
+      host.state.if = true;
+      const target = host.querySelector('#target');
+      assert.equal(target.getAttribute('foo'), 'bar');
+      assert.equal(target.textContent, 'hello');
+    });
+
+    it('processes nested :if nodes when outer is not shown first', () => {
+      const { host } = setupFixture(
+        `<span :if="state.if">
+          <span>Hello</span>
+          <span :if="true">
+            <span id="target" :foo="state.foo">{{ state.value }}</span>
+          </span>
+        </span>`,
+        {
+          state: {
+            if: false,
+            foo: 'bar',
+            value: 'hello'
+          }
+        },
+        false
+      );
+      host.state.if = true;
+      const target = host.querySelector('#target');
+      assert.equal(target.getAttribute('foo'), 'bar');
+      assert.equal(target.textContent, 'hello');
+    });
+
+    it('processes nested :if nodes when both are not shown first (in order)', () => {
+      const { host } = setupFixture(
+        `<span :if="state.if">
+          <span>Hello</span>
+          <span :if="state.if2">
+            <span id="target" :foo="state.foo">{{ state.value }}</span>
+          </span>
+        </span>`,
+        {
+          state: {
+            if: false,
+            if2: false,
+            foo: 'bar',
+            value: 'hello'
+          }
+        },
+        false
+      );
+      host.state.if = true;
+      host.state.if2 = true;
+      const target = host.querySelector('#target');
+      assert.equal(target.getAttribute('foo'), 'bar');
+      assert.equal(target.textContent, 'hello');
+    });
+
+    it('processes nested :if nodes when both are not shown first (reverse order)', () => {
+      const { host } = setupFixture(
+        `<span :if="state.if">
+          <span>Hello</span>
+          <span :if="state.if2">
+            <span id="target" :foo="state.foo">{{ state.value }}</span>
+          </span>
+        </span>`,
+        {
+          state: {
+            if: false,
+            if2: false,
+            foo: 'bar',
+            value: 'hello'
+          }
+        },
+        false
+      );
+      host.state.if2 = true;
+      host.state.if = true;
+      const target = host.querySelector('#target');
+      assert.equal(target.getAttribute('foo'), 'bar');
+      assert.equal(target.textContent, 'hello');
     });
   });
 });

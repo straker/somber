@@ -4,6 +4,7 @@ import {
   startWatchingPaths,
   stopWatchingPaths
 } from '../watcher.js';
+import walk from '../walk.js';
 import { markNode } from '../utils.js';
 
 export default function ifDirective(
@@ -13,34 +14,29 @@ export default function ifDirective(
   name,
   exp
 ) {
-  markNode(directiveNode);
-  const nodes = directiveNode.content
-    ? [...directiveNode.content.childNodes]
-    : [directiveNode];
-  directiveNode.remove();
+  const placeholderNode = document.createTextNode('');
 
   startWatchingPaths();
   const value = evaluate(scope, exp);
   stopWatchingPaths();
 
-  // html can only bind to a single path
+  // if can only bind to a single path
   accessedPaths.map(({ obj, key }) => {
-    reactiveNode.on(obj, key, () => {
-      if (!evaluate(scope, exp)) {
-        return nodes.map(node => node.remove());
-      }
+    let preValue = value;
 
-      insert(directiveNode, nodes);
+    reactiveNode.on(obj, key, () => {
+      const newValue = evaluate(scope, exp);
+      if (newValue && !preValue) {
+        placeholderNode.replaceWith(directiveNode);
+        walk(reactiveNode, scope, directiveNode);
+      } else if (!newValue && preValue) {
+        directiveNode.replaceWith(placeholderNode);
+      }
+      preValue = newValue;
     });
   });
 
-  if (value) {
-    insert(directiveNode, nodes);
+  if (!value) {
+    return directiveNode.replaceWith(placeholderNode);
   }
-}
-
-function insert(directiveNode, nodes) {
-  // use __a.before instead of __b.after to match how :for
-  // uses it and make gzip a little bit better
-  nodes.map(node => directiveNode.__a.before(node));
 }
