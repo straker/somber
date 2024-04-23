@@ -6,7 +6,6 @@ import {
   startWatchingPaths,
   stopWatchingPaths
 } from '../watcher.js';
-import { markNode, getNodesBetweenMark } from '../utils.js';
 
 const forRegex = / (?:in|of) /;
 // match "(value, key, index)" with index being optional
@@ -33,11 +32,9 @@ export default function forDirective(
       valueAlias.match(aliasRegex);
   }
 
+  const template = [...directiveNode.childNodes];
   const forKey = directiveNode.getAttribute(':key');
   directiveNode.removeAttribute(':key');
-
-  markNode(directiveNode); // save spot in DOM
-  directiveNode.remove(); // start with a clean slate
 
   startWatchingPaths();
   const iterable = evaluate(scope, iterator);
@@ -54,7 +51,8 @@ export default function forDirective(
         valueAlias,
         keyAlias,
         indexAlias,
-        forKey
+        forKey,
+        template
       );
     });
   });
@@ -67,7 +65,8 @@ export default function forDirective(
     valueAlias,
     keyAlias,
     indexAlias,
-    forKey
+    forKey,
+    template
   );
 }
 
@@ -79,53 +78,48 @@ function setItems(
   value,
   key,
   index,
-  forKey
+  forKey,
+  template
 ) {
   const items = createItems(
     reactiveNode,
     scope,
-    directiveNode,
     iterable,
     value,
     key,
     index,
-    forKey
+    forKey,
+    template
   );
-
-  const existingNodes = getNodesBetweenMark(directiveNode);
 
   // TODO: what should happen if the browser is currently
   // focused on an element that is a child of the node that
   // will be removed / replaced?
 
   if (!forKey) {
-    existingNodes.map(node => node.remove());
-    // by inserting before the end mark we can easily put all
-    // the items in order as we don't have to keep track of
-    // the last item placed and try to insert after that one
-    items.map(node => directiveNode.__a.before(node));
+    directiveNode.replaceChildren(...items);
   }
 
-  const length = Math.max(items.length, existingNodes.length);
+  // children is an HTMLCollection so we need to clone it
+  // into an array to prevent it from live updating when
+  // we add or remove children
+  const existingItems = [...directiveNode.childNodes];
+  const length = Math.max(items.length, existingItems.length);
   for (let i = 0; i < length; i++) {
     const item = items[i];
-    const curNode = existingNodes[i];
+    const curItem = existingItems[i];
 
-    // sparse array with empty spot
-    if (!item && !curNode) {
-      continue;
-    }
-    // new item
-    else if (item && !curNode) {
-      directiveNode.__a.before(item);
+    // new item at end of list
+    if (item && !curItem) {
+      directiveNode.append(item);
     }
     // removed item
-    else if (curNode && !item) {
-      curNode.remove();
+    else if (curItem && !item) {
+      curItem.remove();
     }
     // changed item
-    else if (curNode.__k != item.__k) {
-      curNode.replaceWith(item);
+    else if (curItem.__k != item.__k) {
+      curItem.replaceWith(item);
     }
     // same item (do nothing)
   }
@@ -134,12 +128,12 @@ function setItems(
 function createItems(
   reactiveNode,
   scope,
-  directiveNode,
   iterable,
   value,
   key,
   index,
-  forKey
+  forKey,
+  template
 ) {
   if (Array.isArray(iterable)) {
     return iterable
@@ -153,7 +147,7 @@ function createItems(
           },
           [key ?? '$index']: index
         });
-        return createItem(reactiveNode, ctx, directiveNode, forKey);
+        return createItem(reactiveNode, ctx, template, forKey);
       })
       .flat();
   }
@@ -168,19 +162,16 @@ function createItems(
         [key]: objKey,
         [index]: objIndex
       };
-      return createItem(reactiveNode, ctx, directiveNode, forKey);
+      return createItem(reactiveNode, ctx, template, forKey);
     })
     .flat();
 }
 
-function createItem(reactiveNode, scope, directiveNode, forKey) {
-  let item = directiveNode.cloneNode(true);
-  // handle :for attribute on template nodes
-  return (item.content ? [...item.content.childNodes] : [item]).map(
-    item => {
-      walk(reactiveNode, scope, item);
-      item.__k = evaluate(scope, forKey);
-      return item;
-    }
-  );
+function createItem(reactiveNode, scope, template, forKey) {
+  return template.map(node => {
+    const item = node.cloneNode(true);
+    walk(reactiveNode, scope, item);
+    item.__k = evaluate(scope, forKey);
+    return item;
+  });
 }

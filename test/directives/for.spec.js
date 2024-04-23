@@ -7,7 +7,7 @@ describe('for directive', () => {
       `<div id="target" :for="item in state.array">hello</div>`,
       {
         state: {
-          array: [1]
+          array: []
         }
       }
     );
@@ -34,10 +34,39 @@ describe('for directive', () => {
     });
   });
 
+  it('works with "in" separator', () => {
+    const { target } = setupFixture(
+      `<div id="target" :for="item in state.array">
+        <span></span>
+      </div>`,
+      {
+        state: {
+          array: [1]
+        }
+      }
+    );
+    assert.lengthOf(target.children, 1);
+  });
+
+  it('works with "of" separator', () => {
+    const { target } = setupFixture(
+      `<div id="target" :for="item of state.array">
+        <span></span>
+      </div>`,
+      {
+        state: {
+          array: [1]
+        }
+      }
+    );
+    assert.lengthOf(target.children, 1);
+  });
+
   describe('array', () => {
     it('adds a child for each item of the array', () => {
-      const { host } = setupFixture(
+      const { target } = setupFixture(
         `<div id="target" :for="item in state.array">
+          <span></span>
         </div>`,
         {
           state: {
@@ -45,18 +74,18 @@ describe('for directive', () => {
           }
         }
       );
-      assert.lengthOf(host.children, 4);
+      assert.lengthOf(target.children, 4);
       assert.isTrue(
-        Array.from(host.children).every(
-          node => node.nodeName.toLowerCase() === 'div'
+        Array.from(target.children).every(
+          node => node.nodeName.toLowerCase() === 'span'
         )
       );
     });
 
     it('processes the value', () => {
-      const { host } = setupFixture(
+      const { target } = setupFixture(
         `<div id="target" :for="item in state.array">
-          {{ item }}
+          <span>{{ item }}</span>
         </div>`,
         {
           state: {
@@ -65,14 +94,14 @@ describe('for directive', () => {
         }
       );
       for (let i = 0; i < 4; i++) {
-        assert.equal(host.children[i].textContent, i + 1);
+        assert.equal(target.children[i].textContent, i + 1);
       }
     });
 
     it('processes the value when object', () => {
-      const { host } = setupFixture(
+      const { target } = setupFixture(
         `<div id="target" :for="item in state.array">
-          {{ item.text }}
+          <span>{{ item.text }}</span>
         </div>`,
         {
           state: {
@@ -81,14 +110,14 @@ describe('for directive', () => {
         }
       );
       for (let i = 0; i < 3; i++) {
-        assert.equal(host.children[i].textContent, i + 1);
+        assert.equal(target.children[i].textContent, i + 1);
       }
     });
 
     it('processes the value and index', () => {
-      const { host } = setupFixture(
+      const { target } = setupFixture(
         `<div id="target" :for="(item, index) in state.array">
-          {{ index }}.{{ item }}
+          <span>{{ index }}.{{ item }}</span>
         </div>`,
         {
           state: {
@@ -97,14 +126,14 @@ describe('for directive', () => {
         }
       );
       for (let i = 0; i < 4; i++) {
-        assert.equal(host.children[i].textContent, `${i}.${i + 1}`);
+        assert.equal(target.children[i].textContent, `${i}.${i + 1}`);
       }
     });
 
     it('defaults index to $index', () => {
-      const { host } = setupFixture(
+      const { target } = setupFixture(
         `<div id="target" :for="item in state.array">
-          {{ $index }}.{{ item }}
+          <span>{{ $index }}.{{ item }}</span>
         </div>`,
         {
           state: {
@@ -113,14 +142,14 @@ describe('for directive', () => {
         }
       );
       for (let i = 0; i < 4; i++) {
-        assert.equal(host.children[i].textContent, `${i}.${i + 1}`);
+        assert.equal(target.children[i].textContent, `${i}.${i + 1}`);
       }
     });
 
     it('processes the value and index as any name', () => {
-      const { host } = setupFixture(
+      const { target } = setupFixture(
         `<div id="target" :for="(foobar, baz) in state.array">
-          {{ baz }}.{{ foobar }}
+          <span>{{ baz }}.{{ foobar }}</span>
         </div>`,
         {
           state: {
@@ -129,12 +158,12 @@ describe('for directive', () => {
         }
       );
       for (let i = 0; i < 4; i++) {
-        assert.equal(host.children[i].textContent, `${i}.${i + 1}`);
+        assert.equal(target.children[i].textContent, `${i}.${i + 1}`);
       }
     });
 
     it('processes bindings on the nodes', () => {
-      const { host } = setupFixture(
+      const { target } = setupFixture(
         `<div id="target" :for="(value, index) in state.array">
           <span :foo="state.count">{{ index }}.{{ value }}</span>
         </div>`,
@@ -146,14 +175,14 @@ describe('for directive', () => {
         }
       );
       assert.isTrue(
-        Array.from(host.children).every(node =>
-          node.firstElementChild.getAttribute('foo', '10')
+        Array.from(target.children).every(node =>
+          node.getAttribute('foo', '10')
         )
       );
     });
 
     it('handles bindings changing on the nodes', () => {
-      const { host } = setupFixture(
+      const { target, host } = setupFixture(
         `<div id="target" :for="(value, index) in state.array">
           <span :foo="state.count">{{ index }}.{{ value }}</span>
         </div>`,
@@ -166,15 +195,15 @@ describe('for directive', () => {
       );
       host.state.count = 20;
       assert.isTrue(
-        Array.from(host.children).every(node =>
-          node.firstElementChild.getAttribute('foo', '20')
+        Array.from(target.children).every(node =>
+          node.getAttribute('foo', '20')
         )
       );
     });
 
     it('does not re-render the nodes when bindings change', () => {
-      const { host } = setupFixture(
-        `<div id="target" :for="item in state.array">hello</div>`,
+      const { target, host } = setupFixture(
+        `<div id="target" :foo="state.value">hello</div>`,
         {
           state: {
             count: 10,
@@ -182,41 +211,21 @@ describe('for directive', () => {
           }
         }
       );
-      const nodes = Array.from(host.children);
+      const nodes = Array.from(target.children);
       host.state.count = 20;
       assert.isTrue(
-        Array.from(host.children).every(
+        Array.from(target.children).every(
           (node, index) => node === nodes[index]
         )
       );
-    });
-
-    it('works with template element', () => {
-      const { host } = setupFixture(
-        `<template :for="(item, index) in state.array">
-          <span>{{ index }}</span><span>{{ item }}</span>
-        </template>`,
-        {
-          state: {
-            count: 10,
-            array: [1, 2, 3, 4]
-          }
-        },
-        false
-      );
-      assert.lengthOf(host.children, 8);
-      for (let i = 0; i < 4; i++) {
-        let j = i * 2;
-        assert.equal(host.children[j].textContent, i);
-        assert.equal(host.children[j + 1].textContent, i + 1);
-      }
     });
   });
 
   describe('object', () => {
     it('adds a child for each key of the object', () => {
-      const { host } = setupFixture(
+      const { target } = setupFixture(
         `<div id="target" :for="item in state.obj">
+          <span></span>
         </div>`,
         {
           state: {
@@ -230,18 +239,18 @@ describe('for directive', () => {
         }
       );
 
-      assert.lengthOf(host.children, 4);
+      assert.lengthOf(target.children, 4);
       assert.isTrue(
-        Array.from(host.children).every(
-          node => node.nodeName.toLowerCase() === 'div'
+        Array.from(target.children).every(
+          node => node.nodeName.toLowerCase() === 'span'
         )
       );
     });
 
     it('processes the value', () => {
-      const { host } = setupFixture(
+      const { target, host } = setupFixture(
         `<div id="target" :for="value in state.obj">
-          {{ value }}
+          <span>{{ value }}</span>
         </div>`,
         {
           state: {
@@ -257,14 +266,14 @@ describe('for directive', () => {
 
       const values = Object.values(host.state.obj);
       for (let i = 0; i < 4; i++) {
-        assert.equal(host.children[i].textContent, values[i]);
+        assert.equal(target.children[i].textContent, values[i]);
       }
     });
 
     it('processes the value and key', () => {
-      const { host } = setupFixture(
+      const { target, host } = setupFixture(
         `<div id="target" :for="(value, key) in state.obj">
-          {{ key }}: {{ value }}
+          <span>{{ key }}: {{ value }}</span>
         </div>`,
         {
           state: {
@@ -280,16 +289,16 @@ describe('for directive', () => {
       const entries = Object.entries(host.state.obj);
       for (let i = 0; i < 4; i++) {
         assert.equal(
-          host.children[i].textContent,
+          target.children[i].textContent,
           `${entries[i][0]}: ${entries[i][1]}`
         );
       }
     });
 
     it('processes the value, key, and index', () => {
-      const { host } = setupFixture(
+      const { target, host } = setupFixture(
         `<div id="target" :for="(value, key, index) in state.obj">
-          {{index}}. {{ key }}: {{ value }}
+          <span>{{index}}. {{ key }}: {{ value }}</span>
         </div>`,
         {
           state: {
@@ -305,16 +314,16 @@ describe('for directive', () => {
       const entries = Object.entries(host.state.obj);
       for (let i = 0; i < 4; i++) {
         assert.equal(
-          host.children[i].textContent,
+          target.children[i].textContent,
           `${i}. ${entries[i][0]}: ${entries[i][1]}`
         );
       }
     });
 
     it('processes the value, key, and index as any name', () => {
-      const { host } = setupFixture(
+      const { target, host } = setupFixture(
         `<div id="target" :for="(foo, bar, baz) in state.obj">
-          {{baz}}. {{ bar }}: {{ foo }}
+          <span>{{baz}}. {{ bar }}: {{ foo }}</span>
         </div>`,
         {
           state: {
@@ -330,14 +339,14 @@ describe('for directive', () => {
       const entries = Object.entries(host.state.obj);
       for (let i = 0; i < 4; i++) {
         assert.equal(
-          host.children[i].textContent,
+          target.children[i].textContent,
           `${i}. ${entries[i][0]}: ${entries[i][1]}`
         );
       }
     });
 
     it('processes bindings on the nodes', () => {
-      const { host } = setupFixture(
+      const { target } = setupFixture(
         `<div id="target" :for="(value, key, index) in state.obj">
           <span :foo="state.count">{{index}}. {{ key }}: {{ value }}</span>
         </div>`,
@@ -354,14 +363,14 @@ describe('for directive', () => {
         }
       );
       assert.isTrue(
-        Array.from(host.children).every(node =>
-          node.firstElementChild.getAttribute('foo', '10')
+        Array.from(target.children).every(node =>
+          node.getAttribute('foo', '10')
         )
       );
     });
 
     it('handles bindings changing on the nodes', () => {
-      const { host } = setupFixture(
+      const { target, host } = setupFixture(
         `<div id="target" :for="(value, key, index) in state.obj">
           <span :foo="state.count">{{index}}. {{ key }}: {{ value }}</span>
         </div>`,
@@ -379,14 +388,14 @@ describe('for directive', () => {
       );
       host.state.count = 20;
       assert.isTrue(
-        Array.from(host.children).every(node =>
-          node.firstElementChild.getAttribute('foo', '20')
+        Array.from(target.children).every(node =>
+          node.getAttribute('foo', '20')
         )
       );
     });
 
     it('does not re-render the nodes when bindings change', () => {
-      const { host } = setupFixture(
+      const { target, host } = setupFixture(
         `<div id="target" :for="(value, key, index) in state.obj">
           <span :foo="state.count">{{index}}. {{ key }}: {{ value }}</span>
         </div>`,
@@ -402,47 +411,21 @@ describe('for directive', () => {
           }
         }
       );
-      const nodes = Array.from(host.children);
+      const nodes = Array.from(target.children);
       host.state.count = 20;
       assert.isTrue(
-        Array.from(host.children).every(
+        Array.from(target.children).every(
           (node, index) => node === nodes[index]
         )
       );
     });
-
-    it('works with template element', () => {
-      const { host } = setupFixture(
-        `<template :for="(value, key, index) in state.obj">
-          <span>{{ key }}</span><span>{{ value }}</span>
-        </template>`,
-        {
-          state: {
-            count: 10,
-            obj: {
-              first_name: 'John',
-              last_name: 'Doe',
-              age: 'unknown',
-              height: '5.9'
-            }
-          }
-        },
-        false
-      );
-      assert.lengthOf(host.children, 8);
-      const entries = Object.entries(host.state.obj);
-      for (let i = 0; i < 4; i++) {
-        const j = i * 2;
-        assert.equal(host.children[j].textContent, entries[i][0]);
-        assert.equal(host.children[j + 1].textContent, entries[i][1]);
-      }
-    });
   });
 
   describe('when the binding changes', () => {
-    it('updates child nodes', () => {
-      const { host } = setupFixture(
+    it('does not re-render the element', () => {
+      const { target, host } = setupFixture(
         `<div id="target" :for="item in state.array">
+          <span></span>
         </div>`,
         {
           state: {
@@ -451,17 +434,33 @@ describe('for directive', () => {
         }
       );
       host.state.array.push(5);
-      assert.lengthOf(host.children, 5);
+      assert.equal(target, host.querySelector('#target'));
+    });
+
+    it('updates child nodes', () => {
+      const { target, host } = setupFixture(
+        `<div id="target" :for="item in state.array">
+          <span></span>
+        </div>`,
+        {
+          state: {
+            array: [1, 2, 3, 4]
+          }
+        }
+      );
+      host.state.array.push(5);
+      assert.lengthOf(target.children, 5);
       assert.isTrue(
-        Array.from(host.children).every(
-          node => node.nodeName.toLowerCase() === 'div'
+        Array.from(target.children).every(
+          node => node.nodeName.toLowerCase() === 'span'
         )
       );
     });
 
     it('removes child nodes', () => {
-      const { host } = setupFixture(
+      const { target, host } = setupFixture(
         `<div id="target" :for="item in state.array">
+          <span></span>
         </div>`,
         {
           state: {
@@ -470,12 +469,13 @@ describe('for directive', () => {
         }
       );
       host.state.array.length = 2;
-      assert.lengthOf(host.children, 2);
+      assert.lengthOf(target.children, 2);
     });
 
     it('removes child nodes with :key', () => {
-      const { host } = setupFixture(
+      const { target, host } = setupFixture(
         `<div id="target" :for="item in state.array" :key="item">
+          <span></span>
         </div>`,
         {
           state: {
@@ -484,26 +484,28 @@ describe('for directive', () => {
         }
       );
       host.state.array.length = 2;
-      assert.lengthOf(host.children, 2);
+      assert.lengthOf(target.children, 2);
     });
 
     it('handles sparse arrays', () => {
-      const { host } = setupFixture(
+      const { target, host } = setupFixture(
         `<div id="target" :for="item in state.array" :key="item">
+          <span></span>
         </div>`,
         {
           state: {
-            array: [1, 2, 3, 4]
+            array: [1, 2, , , 3, 4]
           }
         }
       );
-      host.state.array[6] = 7;
-      assert.lengthOf(host.children, 5);
+      host.state.array[10] = 7;
+      assert.lengthOf(target.children, 5);
     });
 
     it('updates all children without :key', () => {
-      const { host } = setupFixture(
+      const { target, host } = setupFixture(
         `<div id="target" :for="item in state.array">
+          <span></span>
         </div>`,
         {
           state: {
@@ -511,18 +513,19 @@ describe('for directive', () => {
           }
         }
       );
-      const children = [...host.children];
+      const children = [...target.children];
       host.state.array.push(5);
       assert.isFalse(
-        Array.from(host.children).some(
+        Array.from(target.children).some(
           (child, index) => child === children[index]
         )
       );
     });
 
     it('only updates the changed child with :key (modification)', () => {
-      const { host } = setupFixture(
+      const { target, host } = setupFixture(
         `<div id="target" :for="item in state.array" :key="item">
+          <span></span>
         </div>`,
         {
           state: {
@@ -530,10 +533,10 @@ describe('for directive', () => {
           }
         }
       );
-      const children = [...host.children];
+      const children = [...target.children];
       host.state.array[2] = 6;
       assert.isTrue(
-        Array.from(host.children).every((child, index) => {
+        Array.from(target.children).every((child, index) => {
           if (index === 2) {
             return true;
           }
@@ -541,12 +544,13 @@ describe('for directive', () => {
           return child === children[index];
         })
       );
-      assert.isFalse(host.children[2] === children[2]);
+      assert.isFalse(target.children[2] === children[2]);
     });
 
     it('only updates the changed child with :key (addition)', () => {
-      const { host } = setupFixture(
+      const { target, host } = setupFixture(
         `<div id="target" :for="item in state.array" :key="item">
+          <span></span>
         </div>`,
         {
           state: {
@@ -554,10 +558,10 @@ describe('for directive', () => {
           }
         }
       );
-      const children = [...host.children];
+      const children = [...target.children];
       host.state.array.push(5);
       assert.isTrue(
-        Array.from(host.children).every((child, index) => {
+        Array.from(target.children).every((child, index) => {
           if (index >= 4) {
             return true;
           }
@@ -568,8 +572,9 @@ describe('for directive', () => {
     });
 
     it(':key works with object iterator', () => {
-      const { host } = setupFixture(
+      const { target, host } = setupFixture(
         `<div id="target" :for="(value, key, index) in state.obj" :key="value">
+          <span></span>
         </div>`,
         {
           state: {
@@ -582,10 +587,10 @@ describe('for directive', () => {
           }
         }
       );
-      const children = [...host.children];
+      const children = [...target.children];
       host.state.obj.weight = 150;
       assert.isTrue(
-        Array.from(host.children).every((child, index) => {
+        Array.from(target.children).every((child, index) => {
           if (index >= 4) {
             return true;
           }
@@ -596,8 +601,9 @@ describe('for directive', () => {
     });
 
     it(':key works with object as :key', () => {
-      const { host } = setupFixture(
+      const { target, host } = setupFixture(
         `<div id="target" :for="item in state.array" :key="item.id">
+          <span></span>
         </div>`,
         {
           state: {
@@ -618,10 +624,10 @@ describe('for directive', () => {
           }
         }
       );
-      const children = [...host.children];
+      const children = [...target.children];
       host.state.array.push(5);
       assert.isTrue(
-        Array.from(host.children).every((child, index) => {
+        Array.from(target.children).every((child, index) => {
           if (index >= 4) {
             return true;
           }
@@ -632,7 +638,7 @@ describe('for directive', () => {
     });
 
     it('does not replace node when sub-binding updates', () => {
-      const { host } = setupFixture(
+      const { target, host } = setupFixture(
         `<div id="target" :for="item in state.array" :key="item.id">
           <span>{{ item.first_name }}</span>
         </div>`,
@@ -659,10 +665,10 @@ describe('for directive', () => {
           }
         }
       );
-      const children = [...host.children];
+      const children = [...target.children];
       host.state.array[2].first_name = 'Bob';
-      assert.isTrue(host.children[2] === children[2]);
-      assert.equal(host.children[2].textContent.trim(), 'Bob');
+      assert.isTrue(target.children[2] === children[2]);
+      assert.equal(target.children[2].textContent, 'Bob');
     });
   });
 });

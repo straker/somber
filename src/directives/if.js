@@ -5,7 +5,6 @@ import {
   stopWatchingPaths
 } from '../watcher.js';
 import walk from '../walk.js';
-import { markNode } from '../utils.js';
 
 export default function ifDirective(
   reactiveNode,
