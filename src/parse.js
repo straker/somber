@@ -8,8 +8,7 @@
 //                             1                             2                                    3
 //                     ┏━━━━━━━┻━━━━━━━━┓┏━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━┓ ┏━━━━━━━━━━━┻━━━━━━━━━━┓
 // prettier-ignore
-const pathRegexStr =
-  '([\\p{L}\\p{Nl}$_#][\\p{L}\\p{Nl}$\\p{Mn}\\p{Mc}\\p{Nd}\\p{Pc}]*(\\?*\\.|\\[[^\\]]+\\])*)+';
+const pathRegexStr = '([\\p{L}\\p{Nl}$_#][\\p{L}\\p{Nl}$\\p{Mn}\\p{Mc}\\p{Nd}\\p{Pc}]*(\\?*\\.|\\[[^\\]]+\\])*)+';
 
 // throw out any match that ends with a "(" (i.e. a function call)
 // @see https://stackoverflow.com/a/48140275/2124254
