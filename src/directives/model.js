@@ -1,9 +1,5 @@
 import evaluate from '../evaluate.js';
-import {
-  accessedPaths,
-  startWatchingPaths,
-  stopWatchingPaths
-} from '../watcher.js';
+import parse from '../parse.js';
 import { emit } from '../events.js';
 
 export default function modelDirective(
@@ -20,13 +16,10 @@ export default function modelDirective(
     useCheckedProp || directiveNode.nodeName == 'SELECT';
   const event = useChangeEvent ? 'change' : 'input';
   const prop = useCheckedProp ? 'checked' : 'value';
-
-  startWatchingPaths();
   const value = evaluate(scope, exp);
-  stopWatchingPaths();
 
   // model can only bind to a single path
-  accessedPaths.map(({ obj, key }) => {
+  parse(scope, exp).map(({ obj, key }) => {
     directiveNode.addEventListener(event, () => {
       obj[key] = directiveNode[prop];
       emit(obj, key);

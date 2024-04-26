@@ -1,9 +1,5 @@
 import evaluate from '../evaluate.js';
-import {
-  accessedPaths,
-  startWatchingPaths,
-  stopWatchingPaths
-} from '../watcher.js';
+import parse from '../parse.js';
 import walk from '../walk.js';
 
 export default function ifDirective(
@@ -14,15 +10,11 @@ export default function ifDirective(
   exp
 ) {
   const placeholderNode = document.createTextNode('');
-
-  startWatchingPaths();
   const value = evaluate(scope, exp);
-  stopWatchingPaths();
+  let preValue = value;
 
   // if can only bind to a single path
-  accessedPaths.map(({ obj, key }) => {
-    let preValue = value;
-
+  parse(scope, exp).map(({ obj, key }) => {
     reactiveNode.on(obj, key, () => {
       const newValue = evaluate(scope, exp);
       if (newValue && !preValue) {

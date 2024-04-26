@@ -1,28 +1,7 @@
 import { emit } from './events.js';
 
-let watching = false;
-let next;
-export const accessedPaths = [];
-
 const handler = {
   get(obj, key) {
-    if (!watching || typeof key != 'string' || key.startsWith('__')) {
-      return Reflect.get(...arguments);
-    }
-
-    if (next != obj) {
-      accessedPaths.push({ obj, key });
-    } else {
-      accessedPaths[accessedPaths.length - 1] = { obj, key };
-    }
-
-    const value = obj[key];
-    if (!isObject(value)) {
-      next = null;
-    } else {
-      next = value.__s;
-    }
-
     return Reflect.get(...arguments);
   },
 
@@ -48,7 +27,7 @@ const handler = {
   }
 };
 
-export function watch(obj) {
+export default function watch(obj) {
   if (isProxied(obj)) {
     return obj;
   }
@@ -60,16 +39,6 @@ export function watch(obj) {
   });
 
   return proxyObject(obj);
-}
-
-export function startWatchingPaths() {
-  watching = true;
-  accessedPaths.length = 0;
-  next = null;
-}
-
-export function stopWatchingPaths() {
-  watching = false;
 }
 
 function isProxied(obj) {

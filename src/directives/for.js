@@ -1,11 +1,7 @@
 import evaluate from '../evaluate.js';
 import walk from '../walk.js';
-import {
-  watch,
-  accessedPaths,
-  startWatchingPaths,
-  stopWatchingPaths
-} from '../watcher.js';
+import parse from '../parse.js';
+import watch from '../watch.js';
 
 const forRegex = / (?:in|of) /;
 // match "(value, key, index)" with index being optional
@@ -36,12 +32,10 @@ export default function forDirective(
   const forKey = directiveNode.getAttribute(':key');
   directiveNode.removeAttribute(':key');
 
-  startWatchingPaths();
   const iterable = evaluate(scope, iterator);
-  stopWatchingPaths();
 
   // iterator can only bind to a single path
-  accessedPaths.map(({ obj, key }) => {
+  parse(scope, exp).map(({ obj, key }) => {
     reactiveNode.on(obj, key, () => {
       setItems(
         reactiveNode,

@@ -1,10 +1,6 @@
 import SomberElement from '../somber-element.js';
 import evaluate from '../evaluate.js';
-import {
-  accessedPaths,
-  startWatchingPaths,
-  stopWatchingPaths
-} from '../watcher.js';
+import parse from '../parse.js';
 import { emit } from '../events.js';
 
 // 0 is not considered falsey
@@ -18,17 +14,13 @@ export default function bindDirective(
   exp,
   falsey
 ) {
-  startWatchingPaths();
-  const value = evaluate(scope, exp);
-  stopWatchingPaths();
-
-  accessedPaths.map(({ obj, key }) => {
+  parse(scope, exp).map(({ obj, key }) => {
     reactiveNode.on(obj, key, () => {
       setAttribute(directiveNode, name, evaluate(scope, exp), falsey);
     });
   });
 
-  setAttribute(directiveNode, name, value, falsey);
+  setAttribute(directiveNode, name, evaluate(scope, exp), falsey);
 }
 
 function setAttribute(node, name, value, falsey) {
@@ -45,7 +37,6 @@ function setAttribute(node, name, value, falsey) {
   ) {
     Object.defineProperty(node, name, {
       get() {
-        accessedPaths.push({ obj: node, key: name });
         return value;
       },
       set(value) {},

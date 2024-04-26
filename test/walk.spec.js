@@ -8,31 +8,29 @@ describe('walk', () => {
   });
 
   afterEach(() => {
-    Object.values(_directives).forEach(value => {
-      value.restore?.();
-    });
+    sinon.restore();
   });
 
   it('calls event directive for @click', () => {
-    const spy = sinon.spy(_directives, 'event');
+    const stub = sinon.stub(_directives, 'event');
     fixture.innerHTML = '<div id="target" @click="state.foo"></div>';
     const scope = { state: { foo: 'bar' } };
     const target = fixture.querySelector('#target');
     walk(fixture, scope, fixture);
     assert.isTrue(
-      spy.calledWith(fixture, scope, target, 'click', 'state.foo')
+      stub.calledWith(fixture, scope, target, 'click', 'state.foo')
     );
   });
 
   it('calls event directive for @attribute', () => {
-    const spy = sinon.spy(_directives, 'event');
+    const stub = sinon.stub(_directives, 'event');
     fixture.innerHTML =
       '<div id="target" @custom-event="state.foo"></div>';
     const scope = { state: { foo: 'bar' } };
     const target = fixture.querySelector('#target');
     walk(fixture, scope, fixture);
     assert.isTrue(
-      spy.calledWith(
+      stub.calledWith(
         fixture,
         scope,
         target,
@@ -43,25 +41,36 @@ describe('walk', () => {
   });
 
   it('calls show directive for :show', () => {
-    const spy = sinon.spy(_directives, 'show');
+    const stub = sinon.stub(_directives, 'show');
     fixture.innerHTML = '<div id="target" :show="state.foo"></div>';
     const scope = { state: { foo: 'bar' } };
     const target = fixture.querySelector('#target');
     walk(fixture, scope, fixture);
     assert.isTrue(
-      spy.calledWith(fixture, scope, target, 'show', 'state.foo')
+      stub.calledWith(fixture, scope, target, 'show', 'state.foo')
+    );
+  });
+
+  it('calls show directive for :if', () => {
+    const stub = sinon.stub(_directives, 'if');
+    fixture.innerHTML = '<div id="target" :if="state.foo"></div>';
+    const scope = { state: { foo: 'bar' } };
+    const target = fixture.querySelector('#target');
+    walk(fixture, scope, fixture);
+    assert.isTrue(
+      stub.calledWith(fixture, scope, target, 'if', 'state.foo')
     );
   });
 
   it('calls for directive for :for', () => {
-    const spy = sinon.spy(_directives, 'for');
+    const stub = sinon.stub(_directives, 'for');
     fixture.innerHTML =
       '<div id="target" :for="item in state.foo"></div>';
     const scope = { state: { foo: [] } };
     const target = fixture.querySelector('#target');
     walk(fixture, scope, fixture);
     assert.isTrue(
-      spy.calledWith(
+      stub.calledWith(
         fixture,
         scope,
         target,
@@ -72,50 +81,52 @@ describe('walk', () => {
   });
 
   it('calls bind directive for any attribute', () => {
-    const spy = sinon.spy(_directives, 'bind');
+    const stub = sinon.stub(_directives, 'bind');
     fixture.innerHTML = '<div id="target" :item="state.foo"></div>';
     const scope = { state: { foo: 'bar' } };
     const target = fixture.querySelector('#target');
     walk(fixture, scope, fixture);
     assert.isTrue(
-      spy.calledWith(fixture, scope, target, 'item', 'state.foo')
+      stub.calledWith(fixture, scope, target, 'item', 'state.foo')
     );
   });
 
   it('calls bind directive for :key without :for', () => {
-    const spy = sinon.spy(_directives, 'bind');
+    const stub = sinon.stub(_directives, 'bind');
     fixture.innerHTML = '<div id="target" :key="state.foo"></div>';
     const scope = { state: { foo: 'bar' } };
     const target = fixture.querySelector('#target');
     walk(fixture, scope, fixture);
     assert.isTrue(
-      spy.calledWith(fixture, scope, target, 'key', 'state.foo')
+      stub.calledWith(fixture, scope, target, 'key', 'state.foo')
     );
   });
 
   it('does not call bind directive for :key with :for (key first)', () => {
-    const spy = sinon.spy(_directives, 'bind');
+    const stub = sinon.stub(_directives, 'bind');
+    sinon.stub(_directives, 'for');
     fixture.innerHTML =
       '<div id="target" :key="index" :for="(item, index) in state.foo"></div>';
     const scope = { state: { foo: [] } };
     walk(fixture, scope, fixture);
-    assert.isFalse(spy.called);
+    assert.isFalse(stub.called);
   });
 
   it('does not call bind directive for :key with :for (for first)', () => {
-    const spy = sinon.spy(_directives, 'bind');
+    const stub = sinon.stub(_directives, 'bind');
+    sinon.stub(_directives, 'for');
     fixture.innerHTML =
       '<div id="target" :for="(item, index) in state.foo" :key="index"></div>';
     const scope = { state: { foo: [] } };
     walk(fixture, scope, fixture);
-    assert.isFalse(spy.called);
+    assert.isFalse(stub.called);
   });
 
   it('walks each attribute and calls the appropriate directive', () => {
-    const bindSpy = sinon.spy(_directives, 'bind');
-    const showSpy = sinon.spy(_directives, 'show');
-    const ifSpy = sinon.spy(_directives, 'if');
-    const eventSpy = sinon.spy(_directives, 'event');
+    const bindstub = sinon.stub(_directives, 'bind');
+    const showstub = sinon.stub(_directives, 'show');
+    const ifstub = sinon.stub(_directives, 'if');
+    const eventstub = sinon.stub(_directives, 'event');
     fixture.innerHTML =
       '<div id="target" :foo="state.foo" :bar="state.bar" :baz="state.baz" :show="state.show" :if="state.if" @click="state.click"></div>';
     const scope = {
@@ -124,36 +135,42 @@ describe('walk', () => {
     const target = fixture.querySelector('#target');
     walk(fixture, scope, fixture);
 
-    assert.equal(bindSpy.callCount, 3);
+    assert.equal(bindstub.callCount, 3);
     assert.isTrue(
-      bindSpy
+      bindstub
         .getCall(0)
         .calledWith(fixture, scope, target, 'foo', 'state.foo')
     );
     assert.isTrue(
-      bindSpy
+      bindstub
         .getCall(1)
         .calledWith(fixture, scope, target, 'bar', 'state.bar')
     );
     assert.isTrue(
-      bindSpy
+      bindstub
         .getCall(2)
         .calledWith(fixture, scope, target, 'baz', 'state.baz')
     );
 
-    assert.equal(showSpy.callCount, 1);
+    assert.equal(showstub.callCount, 1);
     assert.isTrue(
-      showSpy.calledWith(fixture, scope, target, 'show', 'state.show')
+      showstub.calledWith(
+        fixture,
+        scope,
+        target,
+        'show',
+        'state.show'
+      )
     );
 
-    assert.equal(ifSpy.callCount, 1);
+    assert.equal(ifstub.callCount, 1);
     assert.isTrue(
-      ifSpy.calledWith(fixture, scope, target, 'if', 'state.if')
+      ifstub.calledWith(fixture, scope, target, 'if', 'state.if')
     );
 
-    assert.equal(eventSpy.callCount, 1);
+    assert.equal(eventstub.callCount, 1);
     assert.isTrue(
-      eventSpy.calledWith(
+      eventstub.calledWith(
         fixture,
         scope,
         target,
@@ -164,20 +181,20 @@ describe('walk', () => {
   });
 
   it('ignores non-bound attributes', () => {
-    const spy = sinon.spy(_directives, 'bind');
+    const stub = sinon.stub(_directives, 'bind');
     fixture.innerHTML = '<div id="target" foo="state.foo"></div>';
     walk(fixture, { state: { foo: 'bar' } }, fixture);
-    assert.isFalse(spy.called);
+    assert.isFalse(stub.called);
   });
 
   it('calls text directive', () => {
-    const spy = sinon.spy(_directives, 'text');
+    const stub = sinon.stub(_directives, 'text');
     fixture.innerHTML = '<div id="target">{{ state.foo }}</div>';
     const scope = { state: { foo: 'bar' } };
     const target = fixture.querySelector('#target');
     walk(fixture, scope, fixture);
     assert.isTrue(
-      spy.calledWith(
+      stub.calledWith(
         fixture,
         scope,
         target.firstChild,
@@ -187,13 +204,13 @@ describe('walk', () => {
   });
 
   it('calls html directive', () => {
-    const spy = sinon.spy(_directives, 'html');
+    const stub = sinon.stub(_directives, 'html');
     fixture.innerHTML = '<div id="target">{{{ state.foo }}}</div>';
     const scope = { state: { foo: 'bar' } };
     const target = fixture.querySelector('#target');
     walk(fixture, scope, fixture);
     assert.isTrue(
-      spy.calledWith(
+      stub.calledWith(
         fixture,
         scope,
         target.firstChild,
@@ -203,34 +220,34 @@ describe('walk', () => {
   });
 
   it('ignores non-bound text', () => {
-    const textSpy = sinon.spy(_directives, 'text');
-    const htmlSpy = sinon.spy(_directives, 'html');
+    const textstub = sinon.stub(_directives, 'text');
+    const htmlstub = sinon.stub(_directives, 'html');
     fixture.innerHTML = '<div id="target">state.foo</div>';
     walk(fixture, { state: { foo: 'bar' } }, fixture);
-    assert.isFalse(textSpy.called);
-    assert.isFalse(htmlSpy.called);
+    assert.isFalse(textstub.called);
+    assert.isFalse(htmlstub.called);
   });
 
   it('walks nested children', () => {
-    const spy = sinon.spy(_directives, 'bind');
+    const stub = sinon.stub(_directives, 'bind');
     fixture.innerHTML =
       '<div><div><div><div><div id="target" :item="state.foo"></div></div></div></div></div>';
     const scope = { state: { foo: 'bar' } };
     const target = fixture.querySelector('#target');
     walk(fixture, scope, fixture);
     assert.isTrue(
-      spy.calledWith(fixture, scope, target, 'item', 'state.foo')
+      stub.calledWith(fixture, scope, target, 'item', 'state.foo')
     );
   });
 
   it('does not process nodes twice', () => {
+    const stub = sinon.stub(_directives, 'bind');
     fixture.innerHTML = '<div id="target" :item="state.foo"></div>';
     const scope = { state: { foo: 'bar' } };
     const target = fixture.querySelector('#target');
     walk(fixture, scope, fixture);
-    const spy = sinon.spy(_directives, 'bind');
     target.setAttribute(':thing', 'state.foo');
     walk(fixture, scope, fixture);
-    assert.isFalse(spy.called);
+    assert.isTrue(stub.calledOnce);
   });
 });

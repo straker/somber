@@ -1,9 +1,5 @@
 import evaluate from '../evaluate.js';
-import {
-  accessedPaths,
-  startWatchingPaths,
-  stopWatchingPaths
-} from '../watcher.js';
+import parse from '../parse.js';
 
 const expressionRegex = /\{\{.+?\}\}/g;
 
@@ -20,12 +16,10 @@ export default function textDirective(
 
   const expressionValues = [];
   expressions.map((exp, index) => {
-    startWatchingPaths();
     const value = evaluate(scope, exp);
-    stopWatchingPaths();
     expressionValues.push(value);
 
-    accessedPaths.map(({ obj, key }) => {
+    parse(scope, exp).map(({ obj, key }) => {
       reactiveNode.on(obj, key, () => {
         expressionValues[index] = evaluate(scope, expressions[index]);
         setText(

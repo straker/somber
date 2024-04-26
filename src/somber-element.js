@@ -1,4 +1,4 @@
-import { watch } from './watcher.js';
+import watch from './watch.js';
 import walk from './walk.js';
 import { on, off } from './events.js';
 

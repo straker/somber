@@ -1,9 +1,5 @@
 import evaluate from '../evaluate.js';
-import {
-  accessedPaths,
-  startWatchingPaths,
-  stopWatchingPaths
-} from '../watcher.js';
+import parse from '../parse.js';
 
 export default function htmlDirective(
   reactiveNode,
@@ -14,16 +10,12 @@ export default function htmlDirective(
   directiveNode = directiveNode.parentElement;
   const exp = nodeValue.slice(3, -3).trim();
 
-  startWatchingPaths();
-  const value = evaluate(scope, exp);
-  stopWatchingPaths();
-
   // html can only bind to a single path
-  accessedPaths.map(({ obj, key }) => {
+  parse(scope, exp).map(({ obj, key }) => {
     reactiveNode.on(obj, key, () => {
       directiveNode.innerHTML = evaluate(scope, exp);
     });
   });
 
-  directiveNode.innerHTML = value;
+  directiveNode.innerHTML = evaluate(scope, exp);
 }

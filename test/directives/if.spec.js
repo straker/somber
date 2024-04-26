@@ -227,6 +227,25 @@ describe('if directive', () => {
       host.state.value = true;
       assert.exists(host.querySelector('#target'));
     });
+
+    it('works for each binding of the expression', () => {
+      const { host, target } = setupFixture(
+        `<div id="target" :if="state.a || state.b || state.c">hello</div>`,
+        {
+          state: {
+            a: false,
+            b: true,
+            c: false
+          }
+        }
+      );
+
+      assert.isTrue(target.isConnected);
+      host.state.b = false;
+      assert.isFalse(target.isConnected);
+      host.state.c = true;
+      assert.isTrue(target.isConnected);
+    });
   });
 
   describe('nested if', () => {
