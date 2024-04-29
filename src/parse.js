@@ -1,14 +1,12 @@
+import { variableName } from './utils.js';
+
 // match a variable path
-// @see https://stackoverflow.com/a/6671856/2124254
+// 1. Match a dot, array access, or optional chain (e.g. allow "state.b",
+//    "state['b']", and "state?.thing" to match as a single path)
 //
-// 1. Valid variable name start character
-// 2. Valid variable name characters after the start
-// 3. Match a dot, array access, or optional chain (e.g. allow "state.b", "state['b']", and "state?.thing" to match as a single path)
-//
-//                             1                             2                                    3
-//                     ┏━━━━━━━┻━━━━━━━━┓┏━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━┓ ┏━━━━━━━━━━━┻━━━━━━━━━━┓
-// prettier-ignore
-const pathRegexStr = '([\\p{L}\\p{Nl}$_#][\\p{L}\\p{Nl}$\\p{Mn}\\p{Mc}\\p{Nd}\\p{Pc}]*(\\?*\\.|\\[[^\\]]+\\])*)+';
+//                                                1
+//                                    ┏━━━━━━━━━━━┻━━━━━━━━━━┓
+const pathRegexStr = `(${variableName}(\\?*\\.|\\[[^\\]]+\\])*)+`;
 
 // throw out any match that ends with a "(" (i.e. a function call)
 // @see https://stackoverflow.com/a/48140275/2124254

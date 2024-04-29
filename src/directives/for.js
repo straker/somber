@@ -1,11 +1,14 @@
 import evaluate from '../evaluate.js';
 import walk from '../walk.js';
 import parse from '../parse.js';
-import watch from '../watch.js';
+import { variableName } from '../utils.js';
 
 const forRegex = / (?:in|of) /;
 // match "(value, key, index)" with index being optional
-const aliasRegex = /\(\s*(\w+),\s*(\w+),?\s*(\w+)?\s*\)/;
+const aliasRegex = new RegExp(
+  `\\(\\s*(${variableName}),\\s*(${variableName}),?\\s*(${variableName})?\\s*\\)`,
+  'u'
+);
 
 export default function forDirective(
   reactiveNode,
@@ -76,7 +79,6 @@ function setItems(
   template
 ) {
   const items = createItems(
-    reactiveNode,
     scope,
     iterable,
     value,
@@ -91,21 +93,23 @@ function setItems(
   // will be removed / replaced?
 
   if (!forKey) {
-    directiveNode.replaceChildren(...items);
+    while (directiveNode.firstChild) {
+      directiveNode.lastChild.remove();
+    }
   }
 
-  // children is an HTMLCollection so we need to clone it
-  // into an array to prevent it from live updating when
-  // we add or remove children
+  // use child nodes so we process text nodes as well
+  // (account for any :if element that's been removed)
   const existingItems = [...directiveNode.childNodes];
   const length = Math.max(items.length, existingItems.length);
   for (let i = 0; i < length; i++) {
-    const item = items[i];
+    const { item, ctx } = items[i] ?? {};
     const curItem = existingItems[i];
 
     // new item at end of list
     if (item && !curItem) {
       directiveNode.append(item);
+      walk(reactiveNode, ctx, item);
     }
     // removed item
     else if (curItem && !item) {
@@ -114,13 +118,13 @@ function setItems(
     // changed item
     else if (curItem.__k != item.__k) {
       curItem.replaceWith(item);
+      walk(reactiveNode, ctx, item);
     }
     // same item (do nothing)
   }
 }
 
 function createItems(
-  reactiveNode,
   scope,
   iterable,
   value,
@@ -132,7 +136,7 @@ function createItems(
   if (Array.isArray(iterable)) {
     return iterable
       .map((item, index) => {
-        const ctx = watch({
+        const ctx = {
           ...scope,
           // use a getter so when the state is updated the scope
           // value reflects the current state of the iterable
@@ -140,8 +144,11 @@ function createItems(
             return iterable[index];
           },
           [key ?? '$index']: index
-        });
-        return createItem(reactiveNode, ctx, template, forKey);
+        };
+        return createItem(ctx, template, forKey).map(item => ({
+          item,
+          ctx
+        }));
       })
       .flat();
   }
@@ -156,15 +163,19 @@ function createItems(
         [key]: objKey,
         [index]: objIndex
       };
-      return createItem(reactiveNode, ctx, template, forKey);
+      return createItem(ctx, template, forKey).map(item => ({
+        item,
+        ctx
+      }));
     })
     .flat();
 }
 
-function createItem(reactiveNode, scope, template, forKey) {
+function createItem(scope, template, forKey) {
   return template.map(node => {
     const item = node.cloneNode(true);
-    walk(reactiveNode, scope, item);
+
+    // k = key
     item.__k = evaluate(scope, forKey);
     return item;
   });

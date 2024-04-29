@@ -181,6 +181,20 @@ describe('for directive', () => {
       );
     });
 
+    it('does not render child with :if', () => {
+      const { target } = setupFixture(
+        `<div id="target" :for="(value, index) in state.array">
+          <span :if="value">{{ index }}.{{ value }}</span>
+        </div>`,
+        {
+          state: {
+            array: [1, 0, 0, 4]
+          }
+        }
+      );
+      assert.lengthOf(target.children, 2);
+    });
+
     it('handles bindings changing on the nodes', () => {
       const { target, host } = setupFixture(
         `<div id="target" :for="(value, index) in state.array">
@@ -203,7 +217,9 @@ describe('for directive', () => {
 
     it('does not re-render the nodes when bindings change', () => {
       const { target, host } = setupFixture(
-        `<div id="target" :foo="state.value">hello</div>`,
+        `<div id="target" :for="(value, index) in state.array">
+          <span :foo="state.count">{{ index }}.{{ value }}</span>
+        </div>`,
         {
           state: {
             count: 10,
@@ -216,6 +232,26 @@ describe('for directive', () => {
       assert.isTrue(
         Array.from(target.children).every(
           (node, index) => node === nodes[index]
+        )
+      );
+    });
+
+    it('handles multiple children', () => {
+      const { target } = setupFixture(
+        `<div id="target" :for="(value, index) in state.array">
+          <span>{{ value }}</span>
+          <span>{{ index }}</span>
+        </div>`,
+        {
+          state: {
+            array: [1, 2, 3, 4]
+          }
+        }
+      );
+      assert.lengthOf(target.children, 8);
+      assert.isTrue(
+        Array.from(target.children).every(
+          node => node.nodeName.toLowerCase() === 'span'
         )
       );
     });
@@ -369,6 +405,25 @@ describe('for directive', () => {
       );
     });
 
+    it('does not render child with :if', () => {
+      const { target, host } = setupFixture(
+        `<div id="target" :for="(value, key, index) in state.obj">
+          <span :if="index == 0 || index == 3">{{ key }}: {{ value }}</span>
+        </div>`,
+        {
+          state: {
+            obj: {
+              first_name: 'John',
+              last_name: 'Doe',
+              age: 'unknown',
+              height: '5.9'
+            }
+          }
+        }
+      );
+      assert.lengthOf(target.children, 2);
+    });
+
     it('handles bindings changing on the nodes', () => {
       const { target, host } = setupFixture(
         `<div id="target" :for="(value, key, index) in state.obj">
@@ -416,6 +471,32 @@ describe('for directive', () => {
       assert.isTrue(
         Array.from(target.children).every(
           (node, index) => node === nodes[index]
+        )
+      );
+    });
+
+    it('handles multiple children', () => {
+      const { target, host } = setupFixture(
+        `<div id="target" :for="(value, key, index) in state.obj">
+          <span>{{ index }}</span>
+          <span>{{ key }}</span>
+          <span>{{ value }}</span>
+        </div>`,
+        {
+          state: {
+            obj: {
+              first_name: 'John',
+              last_name: 'Doe',
+              age: 'unknown',
+              height: '5.9'
+            }
+          }
+        }
+      );
+      assert.lengthOf(target.children, 12);
+      assert.isTrue(
+        Array.from(target.children).every(
+          node => node.nodeName.toLowerCase() === 'span'
         )
       );
     });

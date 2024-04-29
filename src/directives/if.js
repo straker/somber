@@ -13,6 +13,11 @@ export default function ifDirective(
   const value = evaluate(scope, exp);
   let preValue = value;
 
+  // transfer :for key to placeholder
+  if (directiveNode.__k) {
+    placeholderNode.__k = directiveNode.__k;
+  }
+
   // if can only bind to a single path
   parse(scope, exp).map(({ obj, key }) => {
     reactiveNode.on(obj, key, () => {
@@ -27,6 +32,11 @@ export default function ifDirective(
     });
   });
 
+  // the element should be removed from the DOM so its
+  // descendants are not walked. that way we're not
+  // spending resources processing nodes that won't be
+  // visible and probably contains bindings that aren't
+  // ready
   if (!value) {
     return directiveNode.replaceWith(placeholderNode);
   }
