@@ -752,4 +752,19 @@ describe('for directive', () => {
       assert.equal(target.children[2].textContent, 'Bob');
     });
   });
+
+  it('updates the changed child value with :key', () => {
+    const { target, host } = setupFixture(
+      `<div id="target" :for="item in state.array" :key="item">
+        <span>{{ item }}</span>
+      </div>`,
+      {
+        state: {
+          array: [1, 2, 3, 4]
+        }
+      }
+    );
+    host.state.array[2] = 7;
+    assert.equal(target.children[2].textContent, 7);
+  });
 });
