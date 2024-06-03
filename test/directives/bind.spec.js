@@ -50,6 +50,11 @@ describe('bind directive', () => {
       assert.equal(target.getAttribute('foo'), '');
     });
 
+    it('to "" when empty string', () => {
+      const { target } = setupFixture(`<img id="target" :alt="" />`);
+      assert.equal(target.getAttribute('alt'), '');
+    });
+
     it('to "true" when aria-attribute is true', () => {
       const { target } = setupFixture(
         `<div id="target" :aria-foo="true">hello</div>`
@@ -115,13 +120,6 @@ describe('bind directive', () => {
       assert.isFalse(target.hasAttribute('foo'));
     });
 
-    it('when empty', () => {
-      const { target } = setupFixture(
-        `<div id="target" :foo="">hello</div>`
-      );
-      assert.isFalse(target.hasAttribute('foo'));
-    });
-
     it('when expression is false', () => {
       const { target } = setupFixture(
         `<div id="target" :foo="!true">hello</div>`
@@ -151,13 +149,6 @@ describe('bind directive', () => {
     it('when aria-attribute is undefined', () => {
       const { target } = setupFixture(
         `<div id="target" :aria-foo="undefined">hello</div>`
-      );
-      assert.isFalse(target.hasAttribute('aria-foo'));
-    });
-
-    it('when aria-attribute is ""', () => {
-      const { target } = setupFixture(
-        `<div id="target" :aria-foo="">hello</div>`
       );
       assert.isFalse(target.hasAttribute('aria-foo'));
     });
@@ -765,7 +756,7 @@ describe('bind directive', () => {
       assert.equal(target.getAttribute('value'), 'hello');
     });
 
-    it('binds to attribute if element is not a vue-lite component', () => {
+    it('binds to attribute if element is not a somber element', () => {
       customElements.define(
         'normal-component',
         class NormalComponent extends HTMLElement {

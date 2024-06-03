@@ -36,46 +36,43 @@ export default function walk(reactiveNode, scope, rootNode) {
     }
     walkCache.set(node, 1);
 
-    switch (node.nodeType) {
-      case 1: {
-        // Node.ELEMENT_NODE
-        const hasForBinding = node.hasAttribute(':for');
-        for (let { name, value } of [...node.attributes]) {
-          const type = name[0];
+    const { nodeType, nodeValue } = node;
+    if (nodeType == 1) {
+      // Node.ELEMENT_NODE
+      const hasForBinding = node.hasAttribute(':for');
+      for (let { name, value } of [...node.attributes]) {
+        const type = name[0];
 
-          // only perform logic on bound values
-          if (![':', '@'].includes(type)) {
-            continue;
-          }
-
-          node.removeAttribute(name);
-          name = name.substr(1);
-
-          if (name == 'key' && hasForBinding) {
-            continue;
-          }
-
-          const directive =
-            type == '@'
-              ? _directives.event
-              : _directives[name] ?? _directives.bind;
-          directive(reactiveNode, scope, node, name, value.trim());
-        }
-        break;
-      }
-      case 3: // Node.TEXT_NODE
-        const { nodeValue } = node;
         // only perform logic on bound values
-        if (!nodeValue.includes('{{')) {
+        if (![':', '@'].includes(type)) {
           continue;
         }
 
-        _directives[nodeValue.includes('{{{') ? 'html' : 'text'](
-          reactiveNode,
-          scope,
-          node,
-          nodeValue.trim()
-        );
+        node.removeAttribute(name);
+        name = name.substr(1);
+
+        if (name == 'key' && hasForBinding) {
+          continue;
+        }
+
+        const directive =
+          type == '@'
+            ? _directives.event
+            : _directives[name] ?? _directives.bind;
+        directive(reactiveNode, scope, node, name, value.trim());
+      }
+    } else if (nodeType == 3) {
+      // only perform logic on bound values
+      if (!nodeValue.includes('{{')) {
+        continue;
+      }
+
+      _directives[nodeValue.includes('{{{') ? 'html' : 'text'](
+        reactiveNode,
+        scope,
+        node,
+        nodeValue.trim()
+      );
     }
   }
 }

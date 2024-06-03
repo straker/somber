@@ -3,8 +3,8 @@ import evaluate from '../evaluate.js';
 import parse from '../parse.js';
 import { emit } from '../events.js';
 
-// 0 is not considered falsey
-const falseyValues = [false, undefined, null, ''];
+// 0 and empty string are not considered falsey
+const falseyValues = [false, undefined, null];
 
 export default function bindDirective(
   reactiveNode,
@@ -26,9 +26,9 @@ export default function bindDirective(
 function setAttribute(node, name, value, falsey) {
   value = falsey ? !value : value;
 
-  // set component props on vue-lite components only, otherwise
+  // set component props on somber elements only, otherwise
   // set binding normally (that way we can handle normal custom
-  // elements with observed attributes')
+  // elements with observed attributes)
   const element = customElements.get(node.nodeName.toLowerCase());
   if (
     element &&
@@ -43,22 +43,14 @@ function setAttribute(node, name, value, falsey) {
       configurable: true
     });
 
-    emit(node, name);
-    return;
+    return emit(node, name);
   }
-
-  const ariaAttr = name.startsWith('aria-');
 
   // class attribute will be set with an object
   if (name == 'class') {
     return Object.entries(value).map(([propName, condition]) => {
       propName = propName.trim().split(/\s+/g);
-
-      if (!condition) {
-        return node.classList.remove(...propName);
-      }
-
-      node.classList.add(...propName);
+      node.classList[condition ? 'add' : 'remove'](...propName);
     });
   }
 
@@ -78,7 +70,7 @@ function setAttribute(node, name, value, falsey) {
 
   // falsey (except 0) boolean non-aria attributes will
   // automatically be removed
-  if (!ariaAttr) {
+  if (!name.startsWith('aria-')) {
     if (falseyValues.includes(value)) {
       return node.removeAttribute(name);
     }
@@ -97,8 +89,9 @@ function setAttribute(node, name, value, falsey) {
   if (value === false) {
     return node.setAttribute(name, 'false');
   }
+
   // falsey (except 0) boolean aria attributes get removed
-  else if (falseyValues.includes(value)) {
+  if (falseyValues.includes(value)) {
     return node.removeAttribute(name);
   }
 

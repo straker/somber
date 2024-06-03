@@ -1,18 +1,14 @@
 import evaluate from '../evaluate.js';
 
 export default function eventDirective(
-  reactiveNode,
+  _,
   scope,
   directiveNode,
   name,
   exp
 ) {
   directiveNode.addEventListener(name, $event => {
-    const ctx = {
-      ...scope,
-      $event
-    };
-    const value = evaluate(ctx, exp);
+    const value = evaluate({ ...scope, $event }, exp);
     if (typeof value == 'function') {
       value($event);
     }
