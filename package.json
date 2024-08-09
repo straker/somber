@@ -1,7 +1,7 @@
 {
   "name": "somber",
   "version": "1.0.0",
-  "description": "A 5kb reactive component framework based on Vue.js",
+  "description": "A lightweight reactive component framework based on Vue.js",
   "main": "somber.js",
   "module": "somber.mjs",
   "sideEffects": false,
