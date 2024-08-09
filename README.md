@@ -1,7 +1,7 @@
 [![Version](https://badge.fury.io/js/somber.svg)](https://badge.fury.io/js/somber)
 [![Build Status](https://github.com/straker/somber/actions/workflows/tests.yml/badge.svg)](https://github.com/straker/somber/actions)
 
-# Kontra.js
+# Somber.js
 
 A lightweight reactive component framework based on Vue.js, optimized for js13kGames. 
 

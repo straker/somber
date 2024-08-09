@@ -8,7 +8,7 @@ The goal of Somber is not to implement everything you could possibly need. After
 
 Instead, Somber aims to implement basic requirements for data binding and reactivity. This allows it to be used when your file size is limited.
 
-### Features Kontra Won't Support
+### Features Somber Won't Support
 
 Below is a list of features the library will not support or add:
 
