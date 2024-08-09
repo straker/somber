@@ -15,7 +15,7 @@ See the [Contributing file](CONTRIBUTING.md).
 
 ## Supporting
 
-Kontra.js is made possible by users like you. Through helping find issues, opening pull requests, and [funding continuous development](https://www.patreon.com/straker), Kontra.js can continue to provide you with quality improvements and updates.
+Somber.js is made possible by users like you. Through helping find issues, opening pull requests, and [funding continuous development](https://www.patreon.com/straker), Somber.js can continue to provide you with quality improvements and updates.
 
 When you become a Patron, you get access to behind the scenes development logs, the ability to vote on which features to work on next, and early access to development builds. 
 
