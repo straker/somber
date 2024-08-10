@@ -6,6 +6,7 @@ const plumber = require('gulp-plumber');
 const rollup = require('@rollup/stream');
 const source = require('vinyl-source-stream');
 const pkg = require('./package.json');
+require('./tasks/docs.js');
 
 const headerComment = `/**
  * @preserve

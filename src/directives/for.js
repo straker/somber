@@ -10,6 +10,61 @@ const aliasRegex = new RegExp(
   'u'
 );
 
+/**
+ * Output the contents of the element multiple times. Takes an array or object.
+ *
+ * The value must be in the form of either `alias in expression` or `alias of expression`, similar to a JavaScript `for..of` or `for..in` statement. If the syntax is not correct it will throw a SyntaxError of `invalid :for expression`.
+ *
+ * The `alias` value can be in the form of a single alias name, `(valueAlias, indexAlias)` if iterating over an array, or `(valueAlias, keyAlias, indexAlias)` if iterating over an object.
+ *
+ * If iterating over an array, the index value of the current item can be accessed using the `$index` property, unless the index value has been aliased by a different name.
+ *
+ * When values of the iterator change, the directive will update the outputted contents. The default behavior will remove the entire contents before adding back the current values. To change this behavior to update in-place, use the `key` property to give unique ids to each element. The `key` property is processed with the scope of the current item so can use the aliases from the :for directive.
+ *
+ * @example
+ * <!-- Loop over an array -->
+ * <ul :for="item in array">
+ *   <li>{{ item }}</li>
+ * </ul>
+ *
+ * <!-- Loop over an array with $index property -->
+ * <ul :for="item in array">
+ *   <li>{{ $index }}: {{ item }}</li>
+ * </ul>
+ *
+ * <!-- Loop over an array with alias for index -->
+ * <ul :for="(item, i) in array">
+ *   <li>{{ i }}: {{ item }}</li>
+ * </ul>
+ *
+ * <!-- Loop over an objects values -->
+ * <ul :for="value in object">
+ *   <li>{{ value }}</li>
+ * </ul>
+ *
+ * <!-- Loop over an objects values with alias for key names -->
+ * <ul :for="(value, key) in object">
+ *   <li>{{ key }}: {{ value }}</li>
+ * </ul>
+ *
+ * <!-- Loop over an objects values with alias for key names and index value -->
+ * <ul :for="(value, key, index) in object">
+ *   <li>{{ index}}: {{ key }}: {{ value }}</li>
+ * </ul>
+ *
+ * <!-- Designate a unique key for each array item -->
+ * <ul :for="(item, index) in array" :key="index">
+ *   <li>{{ item }}</li>
+ * </ul>
+ *
+ * <!-- Designate a unique key for each object item -->
+ * <ul :for="item in objArray" :key="item.id">
+ *   <li>{{ item.text }}</li>
+ * </ul>
+ *
+ * @section For
+ * @sectionof Directives
+ */
 export default function forDirective(
   reactiveNode,
   scope,
@@ -22,7 +77,7 @@ export default function forDirective(
     .map(part => part.trim());
 
   if (!iterator) {
-    throw new Error(`invalid :for expression: ${exp}`);
+    throw new SyntaxError(`invalid :for expression: ${exp}`);
   }
 
   let keyAlias, indexAlias;

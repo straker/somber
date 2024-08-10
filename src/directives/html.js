@@ -1,6 +1,17 @@
 import evaluate from '../evaluate.js';
 import parse from '../parse.js';
 
+/**
+ * Output the value of an expression as raw HTML without escaping any special characters or processing any expressions within the value.
+ *
+ * Updates to the value will update the output.
+ *
+ * @example
+ * <div>{{{ rawHTML }}}</div>
+ *
+ * @section Html
+ * @sectionof Directives
+ */
 export default function htmlDirective(
   reactiveNode,
   scope,

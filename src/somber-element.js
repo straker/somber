@@ -4,6 +4,12 @@ import { on, off } from './events.js';
 
 const template = document.createElement('div');
 
+/**
+ *
+ *
+ * @sectionName SomberElement
+ * @page SomberElement
+ */
 export default class SomberElement extends HTMLElement {
   #cbs = [];
 

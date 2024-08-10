@@ -3,6 +3,19 @@ import parse from '../parse.js';
 
 const expressionRegex = /\{\{.+?\}\}/g;
 
+/**
+ * Bind the element's text content to an expression.
+ *
+ * @example
+ * <!-- single text expressions -->
+ * <span>{{ textValue }}</span>
+ *
+ * <!-- multiple text expressions -->
+ * <span>{{ user.firstName }} {{ user.lastName }}</span>
+ *
+ * @section Text
+ * @sectionof Directives
+ */
 export default function textDirective(
   reactiveNode,
   scope,

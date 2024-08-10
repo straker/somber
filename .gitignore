@@ -3,3 +3,5 @@ node_modules
 coverage
 /somber.*
 test/playground.html
+docs/**/*.html
+docs/assets/js/somber.js

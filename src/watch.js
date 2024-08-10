@@ -27,6 +27,11 @@ const handler = {
   }
 };
 
+/**
+ * Watch a value for changes. Once
+ *
+ * @sectionName Watch
+ */
 export default function watch(obj) {
   if (isProxied(obj)) {
     return obj;

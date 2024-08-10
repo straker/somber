@@ -1,3 +1,36 @@
+/**
+ * Bind a HTML attribute or component prop to a property value or expression. If binding to a class or style attribute `bind` also supports objects.
+ *
+ * Expressions that result in `false`, `null` or `undefined` will remove the attribute from the element. Other falsey values (such as an empty string or `0`) will not remove the attribute. For ARIA attributes, an expression that results in `false` will not remove the attribute (e.g. `:aria-disabled="false"`).
+ *
+ * If the attribute being bound is a JavaScript property on the component, it will instead bind the expression to the property and not set it as an HTML attribute. This behavior is limited to only SomberElements in order to support non-SomberElement custom elements.
+ *
+ * Class or style attribute bindings will not override a static class or style attribute. Instead only bound properties of the class or style binding will override any static properties.
+ *
+ * @example
+ * <!-- bind an attribute to a property value -->
+ * <a :href="homeLink">Home</a>
+ *
+ * <!-- bind an an attribute to an expression -->
+ * <img :src="value ? value : 'http://example.com/img.png'">
+ *
+ * <!-- class binding -->
+ * <div :class="{ main: state.isMain }"></div>
+ * <div :class="{ main: state.main ? true : false }"></div>
+ *
+ * <!-- static class and class binding -->
+ * <div class="main" :class="{ active: isActive }"></div>
+ *
+ * <!-- style binding -->
+ * <div :style="{ padding: state.padding }"
+ * <div :style="{ position: position ? position : 'relative' }"></div>
+ *
+ * <!-- static style and style binding -->
+ * <div style="background: red" :style="{ color: textColor }"></div>
+ *
+ * @section Bind
+ * @sectionof Directives
+ */
 import SomberElement from '../somber-element.js';
 import evaluate from '../evaluate.js';
 import parse from '../parse.js';

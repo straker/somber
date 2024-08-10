@@ -2,6 +2,17 @@ import evaluate from '../evaluate.js';
 import parse from '../parse.js';
 import walk from '../walk.js';
 
+/**
+ * Conditionally add the element to the DOM. A truthy value will add the element to the DOM while a falsey value will remove the element from the DOM.
+ *
+ * Updates to the value will reprocess the directive and either add or remove it based on the updated value.
+ *
+ * @example
+ * <span :if="textValue">{{ textValue }}</span>
+ *
+ * @section If
+ * @sectionof Directives
+ */
 export default function ifDirective(
   reactiveNode,
   scope,
