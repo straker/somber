@@ -1,6 +1,6 @@
 /**
 
-Somber is a lightweight reactive component framework based on [Vue.js](https://vuejs.org/), created specifically for the [Js13kGames](http://js13kgames.com/) game jam.
+Somber is a lightweight declarative and reactive component framework based on [Vue.js](https://vuejs.org/), created specifically for the [Js13kGames](http://js13kgames.com/) game jam.
 
 The goal of Somber is not to implement everything you could possibly need. After all, [Vue.js](https://vuejs.org/) already does that.
 

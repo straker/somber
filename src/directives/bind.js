@@ -1,6 +1,8 @@
 /**
  * Bind a HTML attribute or component prop to a property value or expression. If binding to a class or style attribute `bind` also supports objects.
  *
+ * Any HTML attribute may be bound using the `:[attrName]="[boundProperty]"` syntax. For example, to bind the `hidden` attribute to the `isHidden` property of the component you would do `:hidden="isHidden"`.
+ *
  * Expressions that result in `false`, `null` or `undefined` will remove the attribute from the element. Other falsey values (such as an empty string or `0`) will not remove the attribute. For ARIA attributes, an expression that results in `false` will not remove the attribute (e.g. `:aria-disabled="false"`).
  *
  * If the attribute being bound is a JavaScript property on the component, it will instead bind the expression to the property and not set it as an HTML attribute. This behavior is limited to only SomberElements in order to support non-SomberElement custom elements.

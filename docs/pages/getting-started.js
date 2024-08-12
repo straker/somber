@@ -42,13 +42,7 @@ import { SomberElement } from 'somber';
 
 ## Create a Reactive Custom Component
 
-Start by grabbing `SomberElement`.
-
-```js
-import { SomberElement } from 'somber';
-```
-
-Once imported, you can use it to create a reactive custom component in just a few lines of code. The following code creates a button which updates the text to show how many times it's been clicked.
+Once loaded, you can use `SomberElement` to create a reactive custom component in just a few lines of code. The following code creates a button which updates the text to show how many times it's been clicked.
 
 ```js
 customElements.define(
@@ -62,7 +56,7 @@ customElements.define(
    render() {
      return this.html(`
        <button @click="state.count++">
-         <span>Clicked {{ state.count }} time</span><span if="state.count != 1">s</span>
+         <span>Clicked {{ state.count }} time</span><span :show="state.count != 1">s</span>
         </button>
       `);
     }

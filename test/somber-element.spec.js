@@ -82,6 +82,14 @@ describe('SomberElement', () => {
       assert.equal(dom[0].nodeName, 'DIV');
     });
 
+    it('allows multiple roots', () => {
+      const host = document.createElement('custom-component');
+      const dom = host.html(
+        '<div id="one"></div><div id="two"></div>'
+      );
+      assert.equal(dom.length, 2);
+    });
+
     it('walks the DOM and applies bindings', () => {
       const host = document.createElement('custom-component');
       host.state.value = 1;

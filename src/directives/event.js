@@ -3,6 +3,8 @@ import evaluate from '../evaluate.js';
 /**
  * Add an event listener to an element. The event listener can be a function or an inline expression. Supports both native DOM events and custom events.
  *
+ * Any event may be bound, including custom events, using the syntax `@[eventName]="[handler]"`. For example, to bind the `click` event to the `clickHandler` component method you would do `@click="clickHandler"`.
+ *
  * When listening to native DOM events a function has access to the native DOM event as the first argument while an inline expression has access to it through the `$event` property.
  *
  * @example

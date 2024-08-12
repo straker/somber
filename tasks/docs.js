@@ -2,7 +2,7 @@ const gulp = require('gulp');
 const livingcss = require('gulp-livingcss');
 const replace = require('gulp-replace');
 const path = require('path');
-const marked = require('marked');
+const { marked } = require('marked');
 const pkg = require('../package.json');
 const fs = require('fs');
 const glob = require('glob');
@@ -86,7 +86,7 @@ function addSectionAndPage() {
     });
   }
 
-  console.log(JSON.stringify(this.comment.tags, null, 2));
+  // console.log(JSON.stringify(this.comment.tags, null, 2));
 
   this.comment.description = this.comment.description;
 }
@@ -445,27 +445,27 @@ function livingcssPreprocess(context, template, Handlebars) {
     console.log('\n\n=================');
     console.log(JSON.stringify(context, null, 2));
 
-    // context.sections.forEach((section, index) => {
-    //   // sort by methods and properties
-    //   if (section.function) {
-    //     context.methods.push(section);
-    //     context.methodsAndProperties.push(section);
-    //   } else if (section.property) {
-    //     context.properties.push(section);
-    //     context.methodsAndProperties.push(section);
-    //   }
-    //   // the first section is always the description of the API
-    //   else if (index > 0) {
-    //     context.otherSections.push(section);
-    //     section.link = section.name.toLowerCase().replace(/ /g, '-');
-    //   }
+    context.sections.forEach((section, index) => {
+      // sort by methods and properties
+      if (section.function) {
+        context.methods.push(section);
+        context.methodsAndProperties.push(section);
+      } else if (section.property) {
+        context.properties.push(section);
+        context.methodsAndProperties.push(section);
+      }
+      // the first section is always the description of the API
+      else if (index > 0) {
+        context.otherSections.push(section);
+        section.link = section.name.toLowerCase().replace(/ /g, '-');
+      }
 
-    //   context.methods.sort(sortByName);
-    //   context.properties.sort(sortByName);
-    //   context.methodsAndProperties.sort(sortByName);
+      context.methods.sort(sortByName);
+      context.properties.sort(sortByName);
+      context.methodsAndProperties.sort(sortByName);
 
-    //   // buildImports(section);
-    // });
+      // buildImports(section);
+    });
 
     console.log('here');
     Handlebars.registerHelper('json', function (context) {
