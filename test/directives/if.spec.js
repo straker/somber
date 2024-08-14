@@ -1,6 +1,6 @@
 import { setupFixture } from '../testutils.js';
 
-describe('if directive', () => {
+describe.only('if directive', () => {
   it('removes the :if attribute', () => {
     const { target } = setupFixture(
       `<div id="target" :if="true">hello</div>`
@@ -32,11 +32,9 @@ describe('if directive', () => {
 
     it('when the state is true', () => {
       const { target } = setupFixture(
-        `<div id="target" :if="state.value">hello</div>`,
+        `<div id="target" :if="value">hello</div>`,
         {
-          state: {
-            value: true
-          }
+          value: true
         }
       );
       assert.isTrue(target.isConnected);
@@ -44,11 +42,9 @@ describe('if directive', () => {
 
     it('when the negation state is true', () => {
       const { target } = setupFixture(
-        `<div id="target" :if="!state.value">hello</div>`,
+        `<div id="target" :if="!value">hello</div>`,
         {
-          state: {
-            value: false
-          }
+          value: false
         }
       );
       assert.isTrue(target.isConnected);
@@ -56,16 +52,14 @@ describe('if directive', () => {
 
     it('when the binding changes', () => {
       const { host } = setupFixture(
-        `<div id="target" :if="state.value">hello</div>`,
+        `<div id="target" :if="value">hello</div>`,
         {
-          state: {
-            value: false
-          }
+          value: false
         },
         false
       );
       assert.notExists(host.querySelector('#target'));
-      host.state.value = true;
+      host.$data.value = true;
       assert.exists(host.querySelector('#target'));
     });
   });
@@ -118,11 +112,9 @@ describe('if directive', () => {
 
     it('when the state is false', () => {
       const { host } = setupFixture(
-        `<div id="target" :if="state.value">hello</div>`,
+        `<div id="target" :if="value">hello</div>`,
         {
-          state: {
-            value: false
-          }
+          value: false
         },
         false
       );
@@ -131,11 +123,9 @@ describe('if directive', () => {
 
     it('when the negation state is false', () => {
       const { host } = setupFixture(
-        `<div id="target" :if="!state.value">hello</div>`,
+        `<div id="target" :if="!value">hello</div>`,
         {
-          state: {
-            value: true
-          }
+          value: true
         },
         false
       );
@@ -144,16 +134,14 @@ describe('if directive', () => {
 
     it('when the binding changes', () => {
       const { target, host } = setupFixture(
-        `<div id="target" :if="state.value">hello</div>`,
+        `<div id="target" :if="value">hello</div>`,
         {
-          state: {
-            value: true
-          }
+          value: true
         },
         false
       );
       assert.isTrue(target.isConnected);
-      host.state.value = false;
+      host.$data.value = false;
       assert.notExists(host.querySelector('#target'));
     });
   });
@@ -164,17 +152,15 @@ describe('if directive', () => {
         `
         <div></div>
         <div></div>
-        <div id="target" :if="state.value">hello</div>
+        <div id="target" :if="value">hello</div>
         <div></div>
       `,
         {
-          state: {
-            value: false
-          }
+          value: false
         },
         false
       );
-      host.state.value = true;
+      host.$data.value = true;
       assert.isTrue(
         host.children[2] === host.querySelector('#target')
       );
@@ -183,20 +169,18 @@ describe('if directive', () => {
     it('inserts multiple elements into the correct place with multiple :if', () => {
       const { target, host } = setupFixture(
         `
-        <div id="a" :if="state.a"></div>
-        <div id="b" :if="state.b"></div>
-        <div id="c" :if="state.c">hello</div>
-        <div id="d" :if="state.d"></div>
+        <div id="a" :if="a"></div>
+        <div id="b" :if="b"></div>
+        <div id="c" :if="c">hello</div>
+        <div id="d" :if="d"></div>
       `,
-        {
-          state: {}
-        },
+        {},
         false
       );
-      host.state.d = true;
-      host.state.b = true;
-      host.state.a = true;
-      host.state.c = true;
+      host.$data.d = true;
+      host.$data.b = true;
+      host.$data.a = true;
+      host.$data.c = true;
       assert.isTrue(host.children[0] === host.querySelector('#a'));
       assert.isTrue(host.children[1] === host.querySelector('#b'));
       assert.isTrue(host.children[2] === host.querySelector('#c'));
@@ -205,45 +189,41 @@ describe('if directive', () => {
 
     it('works when setting to the same value twice', () => {
       const { host } = setupFixture(
-        `<div id="target" :if="state.value">hello</div>`,
+        `<div id="target" :if="value">hello</div>`,
         {
-          state: {
-            value: false
-          }
+          value: false
         },
         false
       );
-      host.state.value = true;
-      host.state.value = true;
-      host.state.value = true;
-      host.state.value = true;
-      host.state.value = false;
-      host.state.value = false;
-      host.state.value = true;
-      host.state.value = true;
-      host.state.value = false;
-      host.state.value = false;
-      host.state.value = false;
-      host.state.value = true;
+      host.$data.value = true;
+      host.$data.value = true;
+      host.$data.value = true;
+      host.$data.value = true;
+      host.$data.value = false;
+      host.$data.value = false;
+      host.$data.value = true;
+      host.$data.value = true;
+      host.$data.value = false;
+      host.$data.value = false;
+      host.$data.value = false;
+      host.$data.value = true;
       assert.exists(host.querySelector('#target'));
     });
 
     it('works for each binding of the expression', () => {
       const { host, target } = setupFixture(
-        `<div id="target" :if="state.a || state.b || state.c">hello</div>`,
+        `<div id="target" :if="a || b || c">hello</div>`,
         {
-          state: {
-            a: false,
-            b: true,
-            c: false
-          }
+          a: false,
+          b: true,
+          c: false
         }
       );
 
       assert.isTrue(target.isConnected);
-      host.state.b = false;
+      host.$data.b = false;
       assert.isFalse(target.isConnected);
-      host.state.c = true;
+      host.$data.c = true;
       assert.isTrue(target.isConnected);
     });
   });
@@ -253,35 +233,31 @@ describe('if directive', () => {
       const { target } = setupFixture(
         `<span :if="true">
           <span>Hello</span>
-          <span id="target" :foo="state.foo">{{ state.value }}</span>
+          <span id="target" :foo="foo">{{ value }}</span>
         </span>`,
         {
-          state: {
-            foo: 'bar',
-            value: 'hello'
-          }
+          foo: 'bar',
+          value: 'hello'
         }
       );
       assert.equal(target.getAttribute('foo'), 'bar');
       assert.equal(target.textContent, 'hello');
     });
 
-    it('processes bindings inside :if even when not shown at first', () => {
+    it.only('processes bindings inside :if even when not shown at first', () => {
       const { host } = setupFixture(
-        `<span :if="state.if">
+        `<span :if="if">
           <span>Hello</span>
-          <span id="target" :foo="state.foo">{{ state.value }}</span>
+          <span id="target" :foo="foo">{{ value }}</span>
         </span>`,
         {
-          state: {
-            if: false,
-            foo: 'bar',
-            value: 'hello'
-          }
+          if: false,
+          foo: 'bar',
+          value: 'hello'
         },
         false
       );
-      host.state.if = true;
+      host.$data.if = true;
       const target = host.querySelector('#target');
       assert.equal(target.getAttribute('foo'), 'bar');
       assert.equal(target.textContent, 'hello');
@@ -292,14 +268,12 @@ describe('if directive', () => {
         `<span :if="true">
           <span>Hello</span>
           <span :if="true">
-            <span id="target" :foo="state.foo">{{ state.value }}</span>
+            <span id="target" :foo="foo">{{ value }}</span>
           </span>
         </span>`,
         {
-          state: {
-            foo: 'bar',
-            value: 'hello'
-          }
+          foo: 'bar',
+          value: 'hello'
         }
       );
       assert.equal(target.getAttribute('foo'), 'bar');
@@ -310,20 +284,18 @@ describe('if directive', () => {
       const { host } = setupFixture(
         `<span :if="true">
           <span>Hello</span>
-          <span :if="state.if">
-            <span id="target" :foo="state.foo">{{ state.value }}</span>
+          <span :if="if">
+            <span id="target" :foo="foo">{{ value }}</span>
           </span>
         </span>`,
         {
-          state: {
-            if: false,
-            foo: 'bar',
-            value: 'hello'
-          }
+          if: false,
+          foo: 'bar',
+          value: 'hello'
         },
         false
       );
-      host.state.if = true;
+      host.$data.if = true;
       const target = host.querySelector('#target');
       assert.equal(target.getAttribute('foo'), 'bar');
       assert.equal(target.textContent, 'hello');
@@ -331,22 +303,20 @@ describe('if directive', () => {
 
     it('processes nested :if nodes when outer is not shown first', () => {
       const { host } = setupFixture(
-        `<span :if="state.if">
+        `<span :if="if">
           <span>Hello</span>
           <span :if="true">
-            <span id="target" :foo="state.foo">{{ state.value }}</span>
+            <span id="target" :foo="foo">{{ value }}</span>
           </span>
         </span>`,
         {
-          state: {
-            if: false,
-            foo: 'bar',
-            value: 'hello'
-          }
+          if: false,
+          foo: 'bar',
+          value: 'hello'
         },
         false
       );
-      host.state.if = true;
+      host.$data.if = true;
       const target = host.querySelector('#target');
       assert.equal(target.getAttribute('foo'), 'bar');
       assert.equal(target.textContent, 'hello');
@@ -354,24 +324,22 @@ describe('if directive', () => {
 
     it('processes nested :if nodes when both are not shown first (in order)', () => {
       const { host } = setupFixture(
-        `<span :if="state.if">
+        `<span :if="if">
           <span>Hello</span>
-          <span :if="state.if2">
-            <span id="target" :foo="state.foo">{{ state.value }}</span>
+          <span :if="if2">
+            <span id="target" :foo="foo">{{ value }}</span>
           </span>
         </span>`,
         {
-          state: {
-            if: false,
-            if2: false,
-            foo: 'bar',
-            value: 'hello'
-          }
+          if: false,
+          if2: false,
+          foo: 'bar',
+          value: 'hello'
         },
         false
       );
-      host.state.if = true;
-      host.state.if2 = true;
+      host.$data.if = true;
+      host.$data.if2 = true;
       const target = host.querySelector('#target');
       assert.equal(target.getAttribute('foo'), 'bar');
       assert.equal(target.textContent, 'hello');
@@ -379,24 +347,22 @@ describe('if directive', () => {
 
     it('processes nested :if nodes when both are not shown first (reverse order)', () => {
       const { host } = setupFixture(
-        `<span :if="state.if">
+        `<span :if="if">
           <span>Hello</span>
-          <span :if="state.if2">
-            <span id="target" :foo="state.foo">{{ state.value }}</span>
+          <span :if="if2">
+            <span id="target" :foo="foo">{{ value }}</span>
           </span>
         </span>`,
         {
-          state: {
-            if: false,
-            if2: false,
-            foo: 'bar',
-            value: 'hello'
-          }
+          if: false,
+          if2: false,
+          foo: 'bar',
+          value: 'hello'
         },
         false
       );
-      host.state.if2 = true;
-      host.state.if = true;
+      host.$data.if2 = true;
+      host.$data.if = true;
       const target = host.querySelector('#target');
       assert.equal(target.getAttribute('foo'), 'bar');
       assert.equal(target.textContent, 'hello');

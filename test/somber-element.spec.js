@@ -14,36 +14,37 @@ describe('SomberElement', () => {
   });
 
   describe('constructor', () => {
-    it('defines state', () => {
+    it('defines $data', () => {
       const host = document.createElement('custom-component');
-      assert.exists(host.state);
+      assert.exists(host.$data);
     });
 
-    it('allows setting state', () => {
+    it('allows setting $data', () => {
       const host = document.createElement('custom-component');
-      host.state.value = 1;
-      assert.equal(host.state.value, 1);
+      host.$data.value = 1;
+      assert.equal(host.$data.value, 1);
     });
   });
 
   describe('connectedCallback', () => {
-    it('watches state for changes', () => {
+    it('watches $data for changes', () => {
       const host = document.createElement('custom-component');
-      const state = host.state;
+      const $data = host.$data;
       fixture.appendChild(host);
-      assert.notEqual(state, host.state);
-      assert.isTrue('__p' in host.state);
+      assert.notEqual($data, host.$data);
+      assert.isTrue('__p' in host.$data);
     });
 
     it('calls render', () => {
       const host = document.createElement('custom-component');
-      const state = host.state;
       host.render = sinon
         .stub()
         .callsFake(() => [document.createElement('div')]);
       fixture.appendChild(host);
       assert.isTrue(host.render.called);
     });
+
+    // TODO: it initializes attributes on $data
   });
 
   describe('on', () => {
@@ -92,23 +93,44 @@ describe('SomberElement', () => {
 
     it('walks the DOM and applies bindings', () => {
       const host = document.createElement('custom-component');
-      host.state.value = 1;
+      host.$data.value = 1;
       const dom = host.html(`
-        <div :foo="state.value">
+        <div id="target" :foo="value">
           <div>
-            <div>{{ state.value }}
+            <div>{{ value }}
           <div>
         </div>
-      `)[1]; // due to whitespace first node is text
-      assert.equal(dom.getAttribute('foo'), '1');
-      assert.equal(dom.textContent.trim(), '1');
+      `);
+      const node = Array.from(dom).find(node => node.getAttribute?.('id') === 'target');
+      assert.equal(node.getAttribute('foo'), '1');
+      assert.equal(node.textContent.trim(), '1');
+    });
+
+    it('walks the DOM for multiple roots', () => {
+      const host = document.createElement('custom-component');
+      host.$data.value = 1;
+      const dom = host.html(`
+        <div :foo="value">
+          <div>
+            <div>{{ value }}</div>
+          </div>
+        </div>
+        <div id="target" :bar="value">
+          <div>
+            <div>Hello {{ value }}</div>
+          </div>
+        </div>
+      `);
+      const node = Array.from(dom).find(node => node.getAttribute?.('id') === 'target');
+      assert.equal(node.getAttribute('bar'), '1');
+      assert.equal(node.textContent.trim(), 'Hello 1');
     });
   });
 
   describe('props', () => {
     it('allows binding to props', () => {
       const { target } = setupFixture(
-        `<custom-component id="target" :value="state.foo">`,
+        `<custom-component id="target" :value="foo">`,
         {
           state: {
             foo: 'bar'
@@ -131,7 +153,7 @@ describe('SomberElement', () => {
 
     it('updates bindings when prop changes', () => {
       const { target, host } = setupFixture(
-        `<custom-component id="target" :value="state.foo">`,
+        `<custom-component id="target" :value="foo">`,
         {
           state: {
             foo: 'bar'
@@ -145,7 +167,7 @@ describe('SomberElement', () => {
         </div>
       `)
       );
-      host.state.foo = 'hello';
+      host.$data.foo = 'hello';
       assert.equal(
         target.querySelector('div').getAttribute('aria-label'),
         'hello'
@@ -218,7 +240,7 @@ describe('SomberElement', () => {
         </div>
       `)
       );
-      host.state.foo.bar.baz = 'goodbye';
+      host.$data.foo.bar.baz = 'goodbye';
       assert.equal(
         target.querySelector('div').getAttribute('aria-label'),
         'goodbye'

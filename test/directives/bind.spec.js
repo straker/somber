@@ -31,13 +31,11 @@ describe('bind directive', () => {
       assert.equal(target.getAttribute('foo'), 'hello');
     });
 
-    it('to state', () => {
+    it('to $data', () => {
       const { target } = setupFixture(
-        `<div id="target" :foo="state.value">hello</div>`,
+        `<div id="target" :foo="value">hello</div>`,
         {
-          state: {
-            value: 100
-          }
+          value: 100
         }
       );
       assert.equal(target.getAttribute('foo'), '100');
@@ -85,15 +83,13 @@ describe('bind directive', () => {
 
     it('when the binding changes', () => {
       const { target, host } = setupFixture(
-        `<div id="target" :value="state.value">hello</div>`,
+        `<div id="target" :value="value">hello</div>`,
         {
-          state: {
-            value: 100
-          }
+          value: 100
         }
       );
       assert.equal(target.getAttribute('value'), '100');
-      host.state.value = -20;
+      host.$data.value = -20;
       assert.equal(target.getAttribute('value'), '-20');
     });
   });
@@ -129,12 +125,17 @@ describe('bind directive', () => {
 
     it('when state is false', () => {
       const { target } = setupFixture(
-        `<div id="target" :foo="state.value">hello</div>`,
+        `<div id="target" :foo="value">hello</div>`,
         {
-          state: {
-            value: false
-          }
+          value: false
         }
+      );
+      assert.isFalse(target.hasAttribute('foo'));
+    });
+
+    it('when the state is empty', () => {
+      const { target } = setupFixture(
+        `<div id="target" :foo="value">hello</div>`
       );
       assert.isFalse(target.hasAttribute('foo'));
     });
@@ -155,12 +156,10 @@ describe('bind directive', () => {
 
     it('when :key is used with :for', () => {
       const { target } = setupFixture(
-        `<div id="target" :key="1" :for="item in state.items">
+        `<div id="target" :key="1" :for="item in items">
         </div>`,
         {
-          state: {
-            items: [1]
-          }
+          items: [1]
         }
       );
       assert.isFalse(target.hasAttribute('key'));
@@ -168,15 +167,13 @@ describe('bind directive', () => {
 
     it('when the binding changes', () => {
       const { target, host } = setupFixture(
-        `<div id="target" :value="state.value">hello</div>`,
+        `<div id="target" :value="value">hello</div>`,
         {
-          state: {
-            value: 100
-          }
+          value: 100
         }
       );
       assert.equal(target.getAttribute('value'), '100');
-      host.state.value = false;
+      host.$data.value = false;
       assert.isFalse(target.hasAttribute('foo'));
     });
   });
@@ -184,14 +181,12 @@ describe('bind directive', () => {
   describe('when the binding changes', () => {
     it('does not re-render the element', () => {
       const { target, host } = setupFixture(
-        `<div id="target" :foo="state.value">hello</div>`,
+        `<div id="target" :foo="value">hello</div>`,
         {
-          state: {
-            value: true
-          }
+          value: true
         }
       );
-      host.state.value = false;
+      host.$data.value = false;
       assert.equal(target, host.querySelector('#target'));
     });
   });
@@ -221,11 +216,9 @@ describe('bind directive', () => {
 
       it('when state is true', () => {
         const { target } = setupFixture(
-          `<div id="target" :class="{ hello: state.value }">hello</div>`,
+          `<div id="target" :class="{ hello: value }">hello</div>`,
           {
-            state: {
-              value: true
-            }
+            value: true
           }
         );
         assert.isTrue(target.classList.contains('hello'));
@@ -233,11 +226,9 @@ describe('bind directive', () => {
 
       it('when state is truthy', () => {
         const { target } = setupFixture(
-          `<div id="target" :class="{ hello: state.value }">hello</div>`,
+          `<div id="target" :class="{ hello: value }">hello</div>`,
           {
-            state: {
-              value: 1
-            }
+            value: 1
           }
         );
         assert.isTrue(target.classList.contains('hello'));
@@ -265,15 +256,13 @@ describe('bind directive', () => {
 
       it('when the binding changes', () => {
         const { target, host } = setupFixture(
-          `<div id="target" :class="{ hello: state.value }">hello</div>`,
+          `<div id="target" :class="{ hello: value }">hello</div>`,
           {
-            state: {
-              value: false
-            }
+            value: false
           }
         );
         assert.isFalse(target.classList.contains('hello'));
-        host.state.value = true;
+        host.$data.value = true;
         assert.isTrue(target.classList.contains('hello'));
       });
 
@@ -289,12 +278,10 @@ describe('bind directive', () => {
         const { target } = setupFixture(
           `<div
             id="target"
-            :class="{ hello: 'foo', [state.name]: true }"
+            :class="{ hello: 'foo', [name]: true }"
           >hello</div>`,
           {
-            state: {
-              name: 'world'
-            }
+            name: 'world'
           }
         );
         assert.isTrue(target.classList.contains('hello'));
@@ -362,11 +349,9 @@ describe('bind directive', () => {
 
       it('when state is false', () => {
         const { target } = setupFixture(
-          `<div id="target" :class="{ hello: state.value }">hello</div>`,
+          `<div id="target" :class="{ hello: value }">hello</div>`,
           {
-            state: {
-              value: false
-            }
+            value: false
           }
         );
         assert.isFalse(target.classList.contains('hello'));
@@ -374,11 +359,9 @@ describe('bind directive', () => {
 
       it('when state is falsey', () => {
         const { target } = setupFixture(
-          `<div id="target" :class="{ hello: state.value }">hello</div>`,
+          `<div id="target" :class="{ hello: value }">hello</div>`,
           {
-            state: {
-              value: 0
-            }
+            value: 0
           }
         );
         assert.isFalse(target.classList.contains('hello'));
@@ -409,15 +392,13 @@ describe('bind directive', () => {
 
       it('when the binding changes', () => {
         const { target, host } = setupFixture(
-          `<div id="target" :class="{ hello: state.value }">hello</div>`,
+          `<div id="target" :class="{ hello: value }">hello</div>`,
           {
-            state: {
-              value: true
-            }
+            value: true
           }
         );
         assert.isTrue(target.classList.contains('hello'));
-        host.state.value = false;
+        host.$data.value = false;
         assert.isFalse(target.classList.contains('hello'));
       });
 
@@ -473,11 +454,9 @@ describe('bind directive', () => {
 
       it('to state', () => {
         const { target } = setupFixture(
-          `<div id="target" :style="{ padding: state.value }">hello</div>`,
+          `<div id="target" :style="{ padding: value }">hello</div>`,
           {
-            state: {
-              value: '10px'
-            }
+            value: '10px'
           }
         );
         assert.equal(target.style.padding, '10px');
@@ -508,15 +487,13 @@ describe('bind directive', () => {
 
       it('when the binding changes', () => {
         const { target, host } = setupFixture(
-          `<div id="target" :style="{ padding: state.value }">hello</div>`,
+          `<div id="target" :style="{ padding: value }">hello</div>`,
           {
-            state: {
-              value: false
-            }
+            value: false
           }
         );
         assert.equal(target.style.padding, '');
-        host.state.value = '4px';
+        host.$data.value = '4px';
         assert.equal(target.style.padding, '4px');
       });
 
@@ -581,11 +558,9 @@ describe('bind directive', () => {
 
       it('when state is false', () => {
         const { target } = setupFixture(
-          `<div id="target" :style="{ padding: state.value }">hello</div>`,
+          `<div id="target" :style="{ padding: value }">hello</div>`,
           {
-            state: {
-              value: false
-            }
+            value: false
           }
         );
         assert.equal(target.style.padding, '');
@@ -626,15 +601,13 @@ describe('bind directive', () => {
 
       it('when the binding changes', () => {
         const { target, host } = setupFixture(
-          `<div id="target" :style="{ padding: state.value }">hello</div>`,
+          `<div id="target" :style="{ padding: value }">hello</div>`,
           {
-            state: {
-              value: '4px'
-            }
+            value: '4px'
           }
         );
         assert.equal(target.style.padding, '4px');
-        host.state.value = 0;
+        host.$data.value = 0;
         assert.equal(target.style.padding, '0px');
       });
 
@@ -677,12 +650,10 @@ describe('bind directive', () => {
 
     it('binds attribute to observed prop', () => {
       const { target } = setupFixture(
-        `<prop-component id="target" :value="state.value">
+        `<prop-component id="target" :value="value">
         </prop-component>`,
         {
-          state: {
-            value: 'hello'
-          }
+          value: 'hello'
         }
       );
       assert.equal(target.value, 'hello');
@@ -690,12 +661,10 @@ describe('bind directive', () => {
 
     it('does not set attribute for observed prop', () => {
       const { target } = setupFixture(
-        `<prop-component id="target" :value="state.value">
+        `<prop-component id="target" :value="value">
         </prop-component>`,
         {
-          state: {
-            value: 'hello'
-          }
+          value: 'hello'
         }
       );
       assert.isFalse(target.hasAttribute('value'));
@@ -703,26 +672,22 @@ describe('bind directive', () => {
 
     it('updates prop when binding changes', () => {
       const { target, host } = setupFixture(
-        `<prop-component id="target" :value="state.value">
+        `<prop-component id="target" :value="value">
         </prop-component>`,
         {
-          state: {
-            value: 'hello'
-          }
+          value: 'hello'
         }
       );
-      host.state.value = 'goodbye';
+      host.$data.value = 'goodbye';
       assert.equal(target.value, 'goodbye');
     });
 
     it('prevents setting prop', () => {
       const { target } = setupFixture(
-        `<prop-component id="target" :value="state.value">
+        `<prop-component id="target" :value="value">
         </prop-component>`,
         {
-          state: {
-            value: 'hello'
-          }
+          value: 'hello'
         }
       );
       target.value = 1;
@@ -731,12 +696,10 @@ describe('bind directive', () => {
 
     it('binds to attribute if prop is not observed', () => {
       const { target } = setupFixture(
-        `<prop-component id="target" :aria-label="state.value">
+        `<prop-component id="target" :aria-label="value">
         </prop-component>`,
         {
-          state: {
-            value: 'hello'
-          }
+          value: 'hello'
         }
       );
       assert.equal(target.getAttribute('aria-label'), 'hello');
@@ -745,12 +708,10 @@ describe('bind directive', () => {
     it('binds to attribute if element is not observing attributes', () => {
       delete PropComponent.observedAttributes;
       const { target } = setupFixture(
-        `<prop-component id="target" :value="state.value">
+        `<prop-component id="target" :value="value">
         </prop-component>`,
         {
-          state: {
-            value: 'hello'
-          }
+          value: 'hello'
         }
       );
       assert.equal(target.getAttribute('value'), 'hello');
@@ -764,12 +725,10 @@ describe('bind directive', () => {
         }
       );
       const { target } = setupFixture(
-        `<normal-component id="target" :value="state.value">
+        `<normal-component id="target" :value="value">
         </normal-component>`,
         {
-          state: {
-            value: 'hello'
-          }
+          value: 'hello'
         }
       );
       assert.equal(target.getAttribute('value'), 'hello');

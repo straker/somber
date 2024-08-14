@@ -10,6 +10,10 @@ export default function evaluate(scope, exp) {
   try {
     return fn(scope);
   } catch (e) {
+    // ignore undefined variables since $scope.var would be fine
+    if (e instanceof ReferenceError && e.message.includes('is not defined')) {
+      return;
+    }
     console.warn(`Error when evaluating expression "${exp}":`);
     console.error(e);
   }
@@ -17,7 +21,7 @@ export default function evaluate(scope, exp) {
 
 function toFunction(exp) {
   try {
-    return new Function(`$data`, `with($data){${exp}}`);
+    return new Function(`$scope`, `with($scope){with($scope.$data || {}){${exp}}}`);
   } catch (e) {
     console.error(`${e.message} in expression: ${exp}`);
     return () => {};

@@ -27,6 +27,11 @@ describe('evaluate', () => {
     assert.equal(value2, 'bar');
   });
 
+  it('evaluates $data property', () => {
+    const value = evaluate({ state: 'foo', $data: { value: 1 } }, 'state + value');
+    assert.equal(value, 'foo1');
+  });
+
   it("does not throw if it can't evaluate", () => {
     assert.doesNotThrow(() => {
       evaluate({ state: 'foo' }, 'foo');

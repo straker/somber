@@ -7,13 +7,14 @@ before(() => {
   fixture.setAttribute('id', 'fixture');
   document.body.appendChild(fixture);
 
-  class TestComponent extends SomberElement {
-    render() {
-      return this.html(html);
+  customElements.define(
+    'test-component',
+    class TestComponent extends SomberElement {
+      render() {
+        return this.html(html);
+      }
     }
-  }
-
-  customElements.define('test-component', TestComponent);
+  );
 });
 
 afterEach(() => {
@@ -25,7 +26,7 @@ export function setupFixture(str, props = {}, alert = true) {
   html = str;
   const host = document.createElement('test-component');
   Object.entries(props).forEach(([name, value]) => {
-    host[name] = value;
+    host.$data[name] = value;
   });
   fixture.appendChild(host);
   const target = host.querySelector('#target');

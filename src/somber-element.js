@@ -37,20 +37,19 @@ const template = document.createElement('div');
 export default class SomberElement extends HTMLElement {
   #cbs = [];
 
-  constructor() {
+  constructor(props = {}) {
     super();
-
-    /**
-     * For ease of convenience, the state property is automatically [watched](api/watch) for changes and will trigger updates to any bindings when any property or sub property is changed.
-     * @memberof SomberElement
-     * @property {Object} state
-     * @page SomberElement
-     */
-    this.state = {};
+    this.$data = props;
   }
 
   connectedCallback() {
-    this.state = watch(this.state);
+    this.$data = watch(this.$data, this, '$data');
+
+    // initialize attribute names so they exist even when
+    // they are static attributes
+    Array.from(this.attributes).map(({name, value}) => {
+      this.$data[name] = value;
+    });
 
     if (this.render) {
       this.append(...this.render());
@@ -96,7 +95,9 @@ export default class SomberElement extends HTMLElement {
    */
   html(str) {
     template.innerHTML = str;
-    walk(this, this, template.firstElementChild);
+    Array.from(template.children).map(child => {
+      walk(this, this, child);
+    });
 
     return template.childNodes;
   }

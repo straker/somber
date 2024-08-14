@@ -1,7 +1,7 @@
 /**
  * Bind a HTML attribute or component prop to a property value or expression. If binding to a class or style attribute `bind` also supports objects.
  *
- * Any HTML attribute may be bound using the `:[attrName]="[boundProperty]"` syntax. For example, to bind the `hidden` attribute to the `isHidden` property of the component you would do `:hidden="isHidden"`.
+ * Any HTML attribute may be bound using the syntax `:[attrName]="[boundProperty]"`. For example, to bind the `hidden` attribute to the `isHidden` component property you would do `:hidden="isHidden"`.
  *
  * Expressions that result in `false`, `null` or `undefined` will remove the attribute from the element. Other falsey values (such as an empty string or `0`) will not remove the attribute. For ARIA attributes, an expression that results in `false` will not remove the attribute (e.g. `:aria-disabled="false"`).
  *
@@ -33,10 +33,10 @@
  * @section Bind
  * @sectionof Directives
  */
-import SomberElement from '../somber-element.js';
 import evaluate from '../evaluate.js';
 import parse from '../parse.js';
 import { emit } from '../events.js';
+import { isSomberElement } from '../utils.js';
 
 // 0 and empty string are not considered falsey
 const falseyValues = [false, undefined, null];
@@ -64,13 +64,11 @@ function setAttribute(node, name, value, falsey) {
   // set component props on somber elements only, otherwise
   // set binding normally (that way we can handle normal custom
   // elements with observed attributes)
-  const element = customElements.get(node.nodeName.toLowerCase());
   if (
-    element &&
-    element.prototype instanceof SomberElement &&
+    isSomberElement(node) &&
     element.observedAttributes?.includes(name)
   ) {
-    Object.defineProperty(node, name, {
+    Object.defineProperty(node.$data, name, {
       get() {
         return value;
       },

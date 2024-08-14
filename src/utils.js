@@ -1,3 +1,5 @@
+import SomberElement from './somber-element.js';
+
 // match a variable name
 // @see https://stackoverflow.com/a/6671856/2124254
 //
@@ -8,3 +10,8 @@
 //                           ┏━━━━━━━┻━━━━━━━━┓┏━━━━━━━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━┓
 // prettier-ignore
 export const variableName = '[\\p{L}\\p{Nl}$_#][\\p{L}\\p{Nl}$\\p{Mn}\\p{Mc}\\p{Nd}\\p{Pc}]*';
+
+export function isSomberElement(node) {
+  const element = customElements.get(node.nodeName.toLowerCase());
+  return element?.prototype instanceof SomberElement;
+}

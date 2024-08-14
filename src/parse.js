@@ -16,20 +16,39 @@ const pathRegex = new RegExp(
 );
 
 export default function parse(scope, exp) {
-  const accessedPaths = [];
-  return (exp.match(pathRegex) ?? [])
+  const paths = [];
+  (exp.match(pathRegex) ?? [])
     .map(path => {
-      let obj = scope;
       // split by dot, array access, or optional chain
       const parts = path.split(/[?.\[\]'"]/).filter(part => !!part);
       const key = parts.pop();
+
+      // part or key does not exist in either, so return both
+      // in case it will be added later
+      let part = parts[0] ?? key;
+      if (
+        scope.$data &&
+        !(part in scope.$data) &&
+        !(part in scope)
+      ) {
+        paths.push({ obj: scope.$data.__s ?? scope.$data, key });
+        paths.push({ obj: scope.__s ?? scope, key });
+        return;
+      }
+
+      // try both scope.$data (inner scope of evaluate) and scope (outer scope)
+      let obj = scope.$data && (parts[0] ?? key) in scope.$data
+        ? scope.$data
+        : scope;
+
       for (const part of parts) {
         obj = obj[part];
         if (!obj) return;
       }
 
       // return the object and not the proxy
-      return { obj: obj.__s ?? obj, key };
-    })
-    .filter(part => !!part);
+      paths.push({ obj: obj.__s ?? obj, key });
+    });
+
+  return paths;
 }

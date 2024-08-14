@@ -25,11 +25,9 @@ describe('html directive', () => {
 
     it('to state', () => {
       const { target } = setupFixture(
-        `<div id="target">{{{ state.value }}}</div>`,
+        `<div id="target">{{{ value }}}</div>`,
         {
-          state: {
-            value: '<span>world</span>'
-          }
+          value: '<span>world</span>'
         }
       );
       assert.equal(target.innerHTML, '<span>world</span>');
@@ -37,15 +35,13 @@ describe('html directive', () => {
 
     it('when the binding changes', () => {
       const { target, host } = setupFixture(
-        `<div id="target">{{{ state.value }}}</div>`,
+        `<div id="target">{{{ value }}}</div>`,
         {
-          state: {
-            value: '<span>today</span>'
-          }
+          value: '<span>today</span>'
         }
       );
       assert.equal(target.innerHTML, '<span>today</span>');
-      host.state.value = '<i>tomorrow</i>';
+      host.$data.value = '<i>tomorrow</i>';
       assert.equal(target.innerHTML, '<i>tomorrow</i>');
     });
 
@@ -60,14 +56,12 @@ describe('html directive', () => {
   describe('when the binding changes', () => {
     it('does not re-render the element', () => {
       const { target, host } = setupFixture(
-        `<div id="target">{{{ state.value }}}</div>`,
+        `<div id="target">{{{ value }}}</div>`,
         {
-          state: {
-            value: true
-          }
+          value: true
         }
       );
-      host.state.value = false;
+      host.$data.value = false;
       assert.equal(target, host.querySelector('#target'));
     });
   });

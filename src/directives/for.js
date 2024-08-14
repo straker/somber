@@ -93,20 +93,19 @@ export default function forDirective(
   const iterable = evaluate(scope, iterator);
 
   // iterator can only bind to a single path
-  parse(scope, exp).map(({ obj, key }) => {
-    reactiveNode.on(obj, key, () => {
-      setItems(
-        reactiveNode,
-        scope,
-        directiveNode,
-        iterable,
-        valueAlias,
-        keyAlias,
-        indexAlias,
-        forKey,
-        template
-      );
-    });
+  const { obj, key } = parse(scope, iterator)[0]
+  reactiveNode.on(obj, key, () => {
+    setItems(
+      reactiveNode,
+      scope,
+      directiveNode,
+      iterable,
+      valueAlias,
+      keyAlias,
+      indexAlias,
+      forKey,
+      template
+    );
   });
 
   setItems(

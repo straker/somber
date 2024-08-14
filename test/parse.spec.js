@@ -125,4 +125,37 @@ describe('parse', () => {
       { obj: scope, key: 'c' }
     ]);
   });
+
+  it('treats $data property as root', () => {
+    const scope = { $data: { a: 1, b: 2 } };
+    const paths = parse(scope, 'a');
+    assert.deepEqual(paths, [{ obj: scope.$data, key: 'a' }]);
+  });
+
+  it('treats nested $data property as root', () => {
+    const scope = { $data: { a: { b: { c: 1 } } } };
+    const paths = parse(scope, 'a.b.c');
+    assert.deepEqual(paths, [{ obj: scope.$data.a.b, key: 'c' }]);
+  });
+
+  it('falls back to root if key doesn\'t exist in $data', () => {
+    const scope = { $data: { c: 3}, a: 1, b: 2 };
+    const paths = parse(scope, 'a');
+    assert.deepEqual(paths, [{ obj: scope, key: 'a' }]);
+  });
+
+  it('prefers $data over root', () => {
+    const scope = { $data: { a: 3}, a: 1, b: 2 };
+    const paths = parse(scope, 'a');
+    assert.deepEqual(paths, [{ obj: scope.$data, key: 'a' }]);
+  });
+
+  it('returns both $data and root if property doesn\'t exist in either', () => {
+    const scope = { $data: {} };
+    const paths = parse(scope, 'a');
+    assert.deepEqual(paths, [
+      { obj: scope.$data, key: 'a' },
+      { obj: scope, key: 'a' }
+    ]);
+  });
 });
